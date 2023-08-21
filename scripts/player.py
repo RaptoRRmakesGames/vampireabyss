@@ -133,7 +133,6 @@ class Player:
         self.powers = {'speed': 1, 'damage' : 1,'dash_strength' : 1 }
         self.base_powers = {'speed': 1, 'damage' : 1,'dash_strength' : 1 }
         
-        self.dash_strength = 9
         
         self.hp = 3
         self.max_hp = 3
@@ -148,6 +147,7 @@ class Player:
         self.go_right = list(range(135,180)) +  list(range(-180,-135))
         self.go_down = range(-135,-45)
         self.go_up = range(45, 135)
+        
         
         self.inventory = Inventory(self)
         self.animator = Animator(
@@ -190,6 +190,8 @@ class Player:
         self.dx, self.dy = 0,0
         self.last_attack_turn = 'left'
         
+        
+        self.dash_strength = 9
         self.can_dash = True
         self.dash = False
         self.stop_dash_time = 150

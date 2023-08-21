@@ -36,11 +36,7 @@ class Animation:
                 return 
                 
             self.index += 1
-            
-            
-            
-        
-        
+
 
 class Animator:
     
