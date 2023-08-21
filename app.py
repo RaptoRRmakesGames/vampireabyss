@@ -747,3 +747,4 @@ if __name__ == '__main__':
     pygame.quit()
 
 # print('hello world 2')
+print('hello world')
