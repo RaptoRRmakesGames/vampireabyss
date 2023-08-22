@@ -147,16 +147,8 @@ class Game:
         self.darken = 150
         
         darkensurf.fill((self.darken, self.darken, self.darken))
-        # pygame.draw.rect(darkensurf, (self.darken,self.darken,self.darken), pygame.Rect(0,0,*darkensurf.get_size()))
-        
         
         light_surfs = {'demontime': None, 'regular': None}
-        
-        ssf = pygame.Surface((200,200), pygame.SRCALPHA)
-        
-        
-        
-        pygame.draw.circle(ssf, (50,50,50), (100,100) ,100)
         
         light_surfs['demontime'] = create_circle_light(100, 1.5, (2,1,1))
         light_surfs['regular'] = create_circle_light(255, 0.6, (1,1,1))
@@ -170,7 +162,7 @@ class Game:
             'chest_glow' : create_circle_light(75, 0.8, (2,2,1)),
             'new_level_block_glow' : create_circle_light(180, 1, (1.2,1.2,1.2)),
             
-            'room_light' : create_circle_light(100, 3),
+            'room_light' : create_circle_light(255, 1.5),
             
             'powerup_glow' : {
                 
@@ -554,10 +546,6 @@ class Game:
         
         self.assets['darken'].fill((self.darken, self.darken, self.darken))
         
-        
-        
-        
-        
         if not self.player.current_room.type == 'fight' or( self.player.curent_hallway and self.player.curent_hallway.rect.colliderect(self.player.rect)):
             draw_lighted_image(
                 self.assets['darken'],
@@ -600,8 +588,6 @@ class Game:
             
             if self.display.get_rect().colliderect(powerup.render_rect):
                 self.display.blit(self.assets['powerup_glow'][type(powerup)], (powerup.rect.centerx - self.scroll[0] - 40, powerup.rect.centery - self.scroll[1] - 40 ,), special_flags=BLEND_RGB_ADD)
-            
-        # if self.display.get_rect().colliderect(self.dungeon.next_level_block.render_rect):
         self.display.blit(self.assets['new_level_block_glow'], 
                           
                           (
@@ -647,8 +633,6 @@ class Game:
 
             self.update_ui()
             
-        
-            
         elif self.state == 'menu' :
             
             self.display = self.darker_surf.copy()
@@ -668,9 +652,7 @@ class Game:
         if self.state == 'game' and not self.player.inventory.open:
             
             self.minimap.render(self.screen, self.player)
-            
-            
-        
+
         self.scroll_speed = 55 / self.player.powers['speed']
         
     def update_camera(self):
