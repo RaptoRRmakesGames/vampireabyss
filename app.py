@@ -45,7 +45,7 @@ def create_circle_light(color_range=100, circle_multiplier=1, color_extra=(1,1,1
     light_surf = pygame.Surface((color_range *2,color_range *2), pygame.SRCALPHA).convert_alpha()
 
     for i in range(color_range):
-        pygame.draw.circle(light_surf, (round(i *color_extra[0])  ,round(i *color_extra[1])  ,round(i * color_extra[2]) ), (light_surf.get_width()//2,light_surf.get_height()//2),color_range - i)
+        pygame.draw.circle(light_surf, (round(i *color_extra[0])  ,round(i *color_extra[1])  ,round(i * color_extra[2]) ), (light_surf.get_width()//2,light_surf.get_height()//2), color_range - i)
 
 
 
@@ -144,7 +144,7 @@ class Game:
 
         darkensurf = pygame.Surface(self.display.get_size()).convert_alpha()
         
-        self.darken = 75
+        self.darken = 150
         
         darkensurf.fill((self.darken, self.darken, self.darken))
         # pygame.draw.rect(darkensurf, (self.darken,self.darken,self.darken), pygame.Rect(0,0,*darkensurf.get_size()))
@@ -159,11 +159,10 @@ class Game:
         pygame.draw.circle(ssf, (50,50,50), (100,100) ,100)
         
         light_surfs['demontime'] = create_circle_light(100, 1.5, (2,1,1))
-        light_surfs['regular'] = create_circle_light(100, 0.6, (2.55,2.55,2.55))
+        light_surfs['regular'] = create_circle_light(255, 0.6, (1,1,1))
         
         
         self.assets = {
-            
             
             'vignette': pygame.transform.scale(pygame.image.load(IMG_PATH+'effects/vignete.png').convert_alpha(), (self.display.get_width() + self.vignette_offset, self.display.get_height()+ self.vignette_offset)),
             'player_light': light_surfs,
@@ -175,8 +174,8 @@ class Game:
             
             'powerup_glow' : {
                 
-                SpeedUp: create_circle_light(70, 0.2 * 3, (3,3,1)),
-                StrenghtUp: create_circle_light(70, 0.2* 3, (3,1,1))
+                SpeedUp: create_circle_light(35, 0.4 * 3, (5,5,1)),
+                StrenghtUp: create_circle_light(35, 0.4* 3, (5,1,1))
                               
                               },
             
@@ -555,7 +554,7 @@ class Game:
         
         self.assets['darken'].fill((self.darken, self.darken, self.darken))
         
-        self.display.blit(self.assets['vignette'], self.vignete_cord )
+        
         
         
         
@@ -613,6 +612,8 @@ class Game:
                            )
                           
                           ,special_flags=BLEND_RGB_ADD)
+        
+        self.display.blit(self.assets['vignette'], self.vignete_cord )
     
     def update(self):
         
