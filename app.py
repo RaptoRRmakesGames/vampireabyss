@@ -33,23 +33,50 @@ def change_color(img,  new_color):
 
 def draw_lighted_image(display: pygame.Surface, img : pygame.Surface, pos:tuple[int, int]):
     
-    display.blit(img,pos,special_flags=BLEND_RGB_ADD)
+    display.blit(img,pos,special_flags=BLEND_RGBA_ADD)
     
 def draw_darkened_image(display, img,pos):
     
-    display.blit(img,pos,special_flags=BLEND_RGB_MULT)
+    display.blit(img,pos,special_flags=BLEND_MULT)
     
 def create_circle_light(color_range=100, circle_multiplier=1, color_extra=(1,1,1)):
     
     
-    light_surf = pygame.Surface((color_range *2,color_range *2)).convert_alpha()
+    light_surf = pygame.Surface((color_range *2,color_range *2), pygame.SRCALPHA).convert_alpha()
 
     for i in range(color_range):
         pygame.draw.circle(light_surf, (round(i *color_extra[0])  ,round(i *color_extra[1])  ,round(i * color_extra[2]) ), (light_surf.get_width()//2,light_surf.get_height()//2),color_range - i)
 
+
+
     light_surf = pygame.transform.scale(light_surf, (light_surf.get_width()*circle_multiplier,light_surf.get_height()*circle_multiplier))
     
     return light_surf
+
+def create_colorized_radial_gradient(radius, center_color, outer_color, intensity=1):
+    size = (2 * radius, 2 * radius)
+    surface = pygame.Surface(size, pygame.SRCALPHA)
+    center = (radius, radius)
+    pixels = pygame.PixelArray(surface)
+    
+    for y in range(size[1]):
+        for x in range(size[0]):
+            pixel = (x, y)
+            distance = pygame.math.Vector2(pixel).distance_to(center)
+            normalized_distance = max(0, min(distance / radius, 1))
+            interpolated_color = (
+                abs(int(center_color[0] + normalized_distance * (outer_color[0] - center_color[0]))),
+                abs(int(center_color[1] + normalized_distance * (outer_color[1] - center_color[1]))),
+                abs(int(center_color[2] + normalized_distance * (outer_color[2] - center_color[2]))),
+            )
+            alpha = abs(int(center_color[3] + normalized_distance * (outer_color[3] - center_color[3])))
+
+            pixels[x, y] = pygame.Color(*interpolated_color, alpha)
+    
+    del pixels
+    for _ in range(intensity-1):
+        surface.blit(surface.copy(), (0,0), special_flags=pygame.BLEND_ADD)
+    return surface
 
 def outline(img):
     mask = pygame.mask.from_surface(img)
@@ -117,19 +144,26 @@ class Game:
 
         darkensurf = pygame.Surface(self.display.get_size()).convert_alpha()
         
-        darken = 100
+        self.darken = 75
         
-        pygame.draw.rect(darkensurf, (darken,darken,darken), pygame.Rect(0,0,*darkensurf.get_size()))
+        darkensurf.fill((self.darken, self.darken, self.darken))
+        # pygame.draw.rect(darkensurf, (self.darken,self.darken,self.darken), pygame.Rect(0,0,*darkensurf.get_size()))
         
         
         light_surfs = {'demontime': None, 'regular': None}
         
+        ssf = pygame.Surface((200,200), pygame.SRCALPHA)
         
-        light_surfs['demontime'] = create_circle_light(125, 1.5, (2,1,1))
-        light_surfs['regular'] = create_circle_light(125, 0.6, (1,1,1))
+        
+        
+        pygame.draw.circle(ssf, (50,50,50), (100,100) ,100)
+        
+        light_surfs['demontime'] = create_circle_light(100, 1.5, (2,1,1))
+        light_surfs['regular'] = create_circle_light(100, 0.6, (2.55,2.55,2.55))
         
         
         self.assets = {
+            
             
             'vignette': pygame.transform.scale(pygame.image.load(IMG_PATH+'effects/vignete.png').convert_alpha(), (self.display.get_width() + self.vignette_offset, self.display.get_height()+ self.vignette_offset)),
             'player_light': light_surfs,
@@ -141,8 +175,8 @@ class Game:
             
             'powerup_glow' : {
                 
-                SpeedUp: create_circle_light(35, 0.4 * 3, (5,5,1)),
-                StrenghtUp: create_circle_light(35, 0.4* 3, (5,1,1))
+                SpeedUp: create_circle_light(70, 0.2 * 3, (3,3,1)),
+                StrenghtUp: create_circle_light(70, 0.2* 3, (3,1,1))
                               
                               },
             
@@ -223,7 +257,9 @@ class Game:
         self.screen = pygame.display.set_mode((1280, 720), flags=flags)
         self.display = pygame.Surface((1280//self.zoom, 720//self.zoom)).convert_alpha()
         self.dis_with_bcg = self.display
-        self.dis_with_bcg.fill((12,15,28))
+        self.dis_with_bcg.fill((36,45,52))
+        self.darker_surf = self.display
+        self.darker_surf.fill((12,15,28))
         self.clock = pygame.time.Clock()
         self.fps_cap = 10000
         
@@ -304,7 +340,6 @@ class Game:
         
         self.light_width = self.assets['player_light'][self.player.state].get_width()//2 
         self.light_height = self.assets['player_light'][self.player.state].get_height()//2
-        
                 
         self.chest_width = self.assets['chest_glow'].get_width()//2 - 40
         self.chest_height = self.assets['chest_glow'].get_height()//2 - 20
@@ -478,8 +513,6 @@ class Game:
         
         self.dungeon.render_hallways(self.display, self.scroll)
         
-        # self.player.render(self.display, self.scroll)
-        
         self.dungeon.render_enemies(self.display, self.scroll)
         
         self.dungeon.render_level_block(self.display, self.scroll)
@@ -487,6 +520,8 @@ class Game:
         self.dungeon.chest_manager.render_chests(self.display, self.scroll)
         
         self.dungeon.powerup_manager.render_powerups(self.display, self.scroll)
+        
+        self.player.render(self.display, self.scroll)
         
     def _collisions(self):
         
@@ -517,37 +552,45 @@ class Game:
         self.dungeon.move_enemies(self.dt)
         
     def _lighting(self):
-        self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
+        
+        self.assets['darken'].fill((self.darken, self.darken, self.darken))
+        
         self.display.blit(self.assets['vignette'], self.vignete_cord )
+        
+        
         
         if not self.player.current_room.type == 'fight' or( self.player.curent_hallway and self.player.curent_hallway.rect.colliderect(self.player.rect)):
             draw_lighted_image(
-                self.display,
+                self.assets['darken'],
                 self.assets['player_light'][self.player.state],
                 (
-                    
+              
                 (self.player.render_rect.centerx) - self.light_width,
                 (self.player.render_rect.centery) - self.light_height 
-                
-                
+          
+          
                 )
             )
+            
+
             
             
         else:
             draw_lighted_image(
-                self.display,
+                self.assets['darken'],
                 self.assets['room_light'],
                 (
                     
-                (self.player.current_room.rect.centerx - self.scroll[0]) - self.light_width - self.player.current_room.rect.width // 2,
+                (self.player.current_room.rect.centerx - self.scroll[0]) - self.light_width - self.player.current_room.rect.width // 2 + 0,
                 (self.player.current_room.rect.centery - self.scroll[1]) - self.light_height - self.player.current_room.rect.height // 2 
                 
                 
                 )
             )
             
-        self.player.render(self.display, self.scroll)
+        
+        
+        self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
         
         for chest in self.dungeon.chest_manager.chests:
             if self.display.get_rect().colliderect(chest.render_rect) and not chest.opened:
@@ -570,7 +613,7 @@ class Game:
                            )
                           
                           ,special_flags=BLEND_RGB_ADD)
-       
+    
     def update(self):
         
         self.pause = self.player.inventory.open
@@ -579,11 +622,11 @@ class Game:
         
         self.dt = self.get_dt()
         
-        self.display = self.dis_with_bcg.copy()
-        
         self.mouse_pos = pygame.mouse.get_pos()[0]/ self.zoom, pygame.mouse.get_pos()[1] / self.zoom
 
         if self.state == 'game':
+            
+            self.display = self.dis_with_bcg.copy()
             
             if not self.pause:
     
@@ -603,11 +646,17 @@ class Game:
 
             self.update_ui()
             
+        
+            
         elif self.state == 'menu' :
+            
+            self.display = self.darker_surf.copy()
             
             self.main_menu()
             
         elif self.state == 'settings':
+            
+            self.display = self.darker_surf.copy()
             
             self.settings()
             

@@ -24,7 +24,7 @@ class Hallway:
         
         self.render_rect = pygame.Rect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
         if display.get_rect().colliderect(self.render_rect):
-            pygame.draw.rect(display, (0,0,0), self.render_rect) 
+            pygame.draw.rect(display, (100,100,100), self.render_rect) 
             # pygame.draw.rect(display, (255,255,255), render_rect, 5) 
 
             # display.blit(room_writing.write(self.ori, pygame.Color(255,255,255)), (self.render_rect.centerx - 30, self.render_rect.centery - 30))
