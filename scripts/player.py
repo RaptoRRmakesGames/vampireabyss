@@ -13,9 +13,8 @@ class Item:
         
         self.tag = tag 
         self.name = name 
-        self.image = img# if img else pygame.Surface((36,36))
+        self.image = img
         self.rect = pygame.Rect(0,0, 36,36)
-        self.image.fill((0,0,0))
 
 class Inventory:
     
@@ -41,7 +40,8 @@ class Inventory:
         
 
         
-        blue = self.writing.write('item', pygame.Color(255,0,255))
+        blue = pygame.Surface((32,32)).convert_alpha()
+        blue.fill((0,0,255))
         
         for i in range(200):
             self.add_item(Item('tourououo', 'Pizza', blue))

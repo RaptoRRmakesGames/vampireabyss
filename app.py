@@ -16,6 +16,9 @@ from scripts.loot import SpeedUp, StrenghtUp
 from scripts.utils import load_images_from_folder
 from scripts.animations import Animation
 
+# thats all there is 
+
+
 debug = False
 
 pygame.init()
@@ -652,8 +655,9 @@ class Game:
         
         self.screen.blit(pygame.transform.scale(self.display, (self.screen.get_width(),self.screen.get_height())), (0,0)) 
         
+        if self.state == 'game':
             
-        self.minimap.render(self.screen, self.player)
+            self.minimap.render(self.screen, self.player) # fuck out of here
 
         self.scroll_speed = 55 / self.player.powers['speed']
         
