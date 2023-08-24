@@ -253,6 +253,7 @@ class Game:
         self.darker_surf.fill((12,15,28))
         self.clock = pygame.time.Clock()
         self.fps_cap = 10000
+        self.time = 100
         
         self.load_assets()
         
@@ -495,8 +496,8 @@ class Game:
         
         self.display.blit(time_surf, (time_rect.x, time_rect.y))
   
-        if self.player.inventory.open:
-            self.player.inventory.render(self.display)
+        # if self.player.inventory.open:
+        self.player.inventory.render(self.display)
     
     def _render_sprites(self):
         
@@ -537,6 +538,8 @@ class Game:
         self.dungeon.chest_manager.update_chests(self.player)
         self.dungeon.powerup_manager.update_powerups(self.dt, self.player)
         self.combat_system.update()
+        
+        self.player.inventory.update(self.dt)
         
     def _move_sprites(self):
         self.player.apply_movement(self.dt)
@@ -603,7 +606,7 @@ class Game:
     
     def update(self):
         
-        self.pause = self.player.inventory.open
+        #self.pause = self.player.inventory.open
         
         self.save_all_every(30000)
         
@@ -615,15 +618,15 @@ class Game:
             
             self.display = self.dis_with_bcg.copy()
             
-            if not self.pause:
+
     
-                self._move_sprites()
-                
-                self._update_sprites()
-                
-                self._collisions()
-                
-                self.update_camera()
+            self._move_sprites()
+            
+            self._update_sprites()
+            
+            self._collisions()
+            
+            self.update_camera()
             
             self._render_sprites()
             
@@ -649,9 +652,8 @@ class Game:
         
         self.screen.blit(pygame.transform.scale(self.display, (self.screen.get_width(),self.screen.get_height())), (0,0)) 
         
-        if self.state == 'game' and not self.player.inventory.open:
             
-            self.minimap.render(self.screen, self.player)
+        self.minimap.render(self.screen, self.player)
 
         self.scroll_speed = 55 / self.player.powers['speed']
         
@@ -728,6 +730,9 @@ class Game:
                     if event.key == pygame.K_TAB:
                         
                         self.player.inventory.open = not self.player.inventory.open
+                        self.player.inventory.vel = 0
+                        
+                        self.time = 100 if not self.player.inventory.open else 25
                     
                     if event.key == pygame.K_r:
                         
@@ -764,7 +769,7 @@ class Game:
     def get_dt(self):
         time_now = time()
         dt = time_now - self.last_time
-        dt*=100
+        dt*=self.time
         self.last_time = time_now
 
         return dt

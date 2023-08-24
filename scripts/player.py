@@ -13,8 +13,8 @@ class Item:
         
         self.tag = tag 
         self.name = name 
-        self.image = img if img else pygame.Surface((12,12))
-        self.rect = pygame.Rect(0,0, 12,12)
+        self.image = img# if img else pygame.Surface((36,36))
+        self.rect = pygame.Rect(0,0, 36,36)
         self.image.fill((0,0,0))
 
 class Inventory:
@@ -28,48 +28,69 @@ class Inventory:
 
         self.open = False
         
-        self.rect = pygame.FRect(55,50, 500, 400 - 100)
+        self.rect = pygame.FRect(60,400, 500, 75)
         
-        self.item_positions = [(60,60), (78,60), (96,60)]
+        self.max_y = 400
+        self.least_y = 300
+        
+        self.item_positions = [(self.rect.center[0] - self.rect.width//2 - 15+ (45* i), self.least_y+20 ) for i in range(1, 12)]
+        
+        self.vel = 0
         
         self.writing = Writing(10)
         
+
+        
+        blue = self.writing.write('item', pygame.Color(255,0,255))
+        
+        for i in range(200):
+            self.add_item(Item('tourououo', 'Pizza', blue))
+            
+
+        self.add_item(Item('tourououo', 'Pizza', blue))
+        
         # print(self.items, "\n\n",self.rendered_dict)
+        
+    def get_tag_list(self):
+        
+        return list(self.items.keys())
         
     def add_item(self, item):
         
-        if item.tag == 'powerup':
-            
-            
-            if item.name == 'maxhealth':
+        if len(self.items.keys()) < 10 or item.tag in self.get_tag_list():
+        
+            if item.tag == 'powerup':
                 
-                print('max health')
                 
-                self.player.max_hp += 1
-                
-                self.player.hp += 1
-                
-                return
-            
-            if item.name == 'health':
-                
-                print('health')
-                
-                if self.player.hp < self.player.max_hp:
+                if item.name == 'maxhealth':
+                    
+                    print('max health')
+                    
+                    self.player.max_hp += 1
+                    
                     self.player.hp += 1
+                    
                     return
                 
-                self.player.coins += randint(17*coin_multi,23*coin_multi)
-                
-                return
-        
-        if item.tag in list(self.items.keys()):
-            self.items[item.tag].append(item)
-        else:
-            self.items[item.tag] = []
-            self.items[item.tag].append(item)
+                if item.name == 'health':
+                    
+                    print('health')
+                    
+                    if self.player.hp < self.player.max_hp:
+                        self.player.hp += 1
+                        return
+                    
+                    self.player.coins += randint(17*coin_multi,23*coin_multi)
+                    
+                    return
             
-        self.refresh_stuff()
+            if item.tag in list(self.items.keys()):
+                self.items[item.tag].append(item)
+            else:
+                self.items[item.tag] = []
+                self.items[item.tag].append(item)
+                
+            self.refresh_stuff()
             
     def refresh_stuff(self):
         
@@ -88,22 +109,57 @@ class Inventory:
                     self.rendered_dict[itemkey] = {}
                     self.rendered_dict[itemkey] = [item, 1]
                     
+    def update(self, dt):
+        
+        if self.player.game.time == 25:
+            dt *= 4
+        
+        
+        
+        self.rect.y += self.vel * dt
+        if self.open: 
+
+            self.vel -= 0.3
+            
+            if self.rect.y < self.least_y:
+                
+                self.rect.y = self.least_y
+                self.vel  =0 
+            
+        else:
+
+            self.vel += 0.3
+            
+            if self.rect.y > self.max_y:
+                
+                self.rect.y = self.max_y
+                
+                self.vel = 0 
+                
+        
+                    
     def render(self, display):
         
-        pygame.draw.rect(display, (255,0,255), self.rect)
-        
-        for x, itemkey in enumerate(list(self.rendered_dict.keys())):
+        if display.get_rect().colliderect(self.rect):
             
-            item_list = self.rendered_dict[itemkey]
+            pygame.draw.rect(display, (200,200,200), self.rect)
+            pygame.draw.rect(display, (0,0,0), self.rect, 5)
             
-            item_count = item_list[1]
-            
-            for i,item in enumerate(item_list):
+            for x, itemkey in enumerate(list(self.rendered_dict.keys())):
                 
-                if i == 0:
-                    display.blit(item.image, self.item_positions[x])
-                    
-            display.blit(self.writing.write(str(item_count), pygame.Color(255,255,255)), self.item_positions[x])
+                item_list = self.rendered_dict[itemkey]
+                
+                item_count = item_list[1]
+                
+                pos = [self.item_positions[x][0], self.item_positions[x][1] -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
+
+                display.blit(item_list[0].image, pos)
+                
+                text = self.writing.write(str(item_count), pygame.Color(255,255,255))
+                
+                text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
+                        
+                display.blit(text, text_rect.topleft)
 
 class Player:
     
@@ -149,7 +205,10 @@ class Player:
         self.go_up = range(45, 135)
         
         
+        
         self.inventory = Inventory(self)
+        
+        
         self.animator = Animator(
             
             {
@@ -190,6 +249,7 @@ class Player:
         self.dx, self.dy = 0,0
         self.last_attack_turn = 'left'
         
+        self.image = self.animator.get_image()
         
         self.dash_strength = 9
         self.can_dash = True
