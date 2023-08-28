@@ -32,7 +32,7 @@ class Hallway:
 
 class Room:
     
-    def __init__(self, topleft, type, dungeon, cord):
+    def __init__(self, topleft, type, dungeon, cord, image):
         
         self.rect = pygame.FRect(topleft[0], topleft[1], ROOM_SIZE, ROOM_SIZE,)
         
@@ -41,6 +41,8 @@ class Room:
         self.cords = cord
         
         self.dungeon = dungeon
+        
+        self.image = image
         
         self.locked = False
         
@@ -64,7 +66,9 @@ class Room:
         render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)     
         
 
+
         pygame.draw.rect(display, (40,40,40), render_rect,)
+        display.blit(self.image, render_rect.topleft)
         # display.blit(room_writing.write(str(self.has_player), pygame.Color(255,255,255)),( self.rect.center[0] - offset[0], self.rect.center[1] - offset[1]))
         
         

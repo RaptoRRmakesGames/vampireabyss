@@ -153,14 +153,12 @@ class Game:
         
         light_surfs = {'demontime': None, 'regular': None}
         
-        light_surfs['demontime'] = create_circle_light(100, 1.5, (2,1,1))
-        light_surfs['regular'] = create_circle_light(255, 0.6, (1,1,1))
+        light_surfs['demontime'] = create_circle_light(100, 1, (2,1,1))
+        light_surfs['regular'] = create_circle_light(255, 0.4, (1,1,1))
         
         
         self.assets = {
-            
-            
-            
+
             'vignette': pygame.transform.scale(pygame.image.load(IMG_PATH+'effects/vignete.png').convert_alpha(), (self.display.get_width() + self.vignette_offset, self.display.get_height()+ self.vignette_offset)),
             'player_light': light_surfs,
             'darken' : darkensurf,

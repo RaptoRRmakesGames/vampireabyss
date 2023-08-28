@@ -1,5 +1,8 @@
 import pygame 
 import os 
+from random import choice 
+
+from scripts.settings import ROOM_SIZE
 
 def load_images_from_folder(folder_path, rotation = 0, flip=False, sizeup= 1):
     images = []  # List to store loaded images
@@ -34,3 +37,60 @@ def get_images_from_spritesheet(img: pygame.Surface, single_img_x):
         imgs.append(sub)
         
     return imgs
+
+def create_room_img():
+    
+    tiles = get_images_from_spritesheet(pygame.image.load('assets/images/world/room_tiles.png'), 16)
+    
+    img = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
+    
+    for x in range(ROOM_SIZE//16):
+        
+        for y in range(ROOM_SIZE//16):
+            
+            crd = (x * 16, y * 16)
+            
+            if y == 0 and x == 0:
+                img.blit(tiles[choice([5,5,5,14])], crd)
+                
+                continue
+            
+            if y == 27 and x == 0:
+                img.blit(tiles[choice([6,6,6, 15])], crd)
+                
+                continue
+            
+            if y == 0 and x == 27:
+                img.blit(tiles[choice([8,8,8,17])], crd)
+                
+                continue
+            
+            if y == 27 and x == 27:
+                img.blit(tiles[choice([7,7,7,16])], crd)
+                
+                continue
+            
+            if y == 0:
+                
+                img.blit(tiles[choice([1,1,1,10])], crd)
+                continue
+                
+            
+            if y == 27:
+                
+                img.blit(tiles[choice([3,3,3,12])], crd)
+                continue
+                
+            if x == 0:
+                
+                img.blit(tiles[choice([2,2,2,11])], crd)
+                continue
+            
+            if x == 27:
+                
+                img.blit(tiles[choice([4,4,4,13])], crd)
+                continue
+            
+            img.blit(tiles[choice([0,0,0,9])], crd)
+            
+    return img

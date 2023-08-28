@@ -7,6 +7,7 @@ from scripts.enemies import EnemyManager
 from scripts.loot import Chest, ChestManager, PowerupManager
 from scripts.loot import NextLevelBlock
 from scripts.writing import room_writing
+from scripts.utils import create_room_img
 
 from time import time
 
@@ -56,7 +57,7 @@ class Dungeon:
         choices = ['fight','fight', 'chest', 'empty', 'empty']
         
         middle_room = f'{self.width // 2};{self.height // 2}'
-        self.rooms[middle_room][1] = Room(self.rooms[middle_room][0], 'start', self, middle_room)
+        self.rooms[middle_room][1] = Room(self.rooms[middle_room][0], 'start', self, middle_room, create_room_img())
         self.middle_room_pos = self.rooms[middle_room][1].rect.center
         self.middle_room = self.rooms[middle_room][1]
         
@@ -89,10 +90,10 @@ class Dungeon:
                     if i < 3 or set_finish:
                         room_choice = choice(choices)
 
-                        self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], room_choice, self,f"{coord_x};{coord_y}")
+                        self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], room_choice, self,f"{coord_x};{coord_y}", create_room_img())
                     else:
                         set_finish = True
-                        self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], 'finish', self,f"{coord_x};{coord_y}")
+                        self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], 'finish', self,f"{coord_x};{coord_y}", create_room_img())
                         self.finish_room = self.rooms[str_cord][1]
                         
                     newroom = self.rooms[str_cord][1]
