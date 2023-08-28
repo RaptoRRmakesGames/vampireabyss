@@ -5,7 +5,7 @@ import os
 username = os.getlogin()
 
 
-ROOM_SIZE = 450
+ROOM_SIZE = 448
 coin_multi = 1
 button_width_height = (100, 30)
 

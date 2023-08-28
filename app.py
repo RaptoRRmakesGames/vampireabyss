@@ -159,6 +159,8 @@ class Game:
         
         self.assets = {
             
+            
+            
             'vignette': pygame.transform.scale(pygame.image.load(IMG_PATH+'effects/vignete.png').convert_alpha(), (self.display.get_width() + self.vignette_offset, self.display.get_height()+ self.vignette_offset)),
             'player_light': light_surfs,
             'darken' : darkensurf,
@@ -182,6 +184,14 @@ class Game:
             
             'main_menu' : load_images_from_folder(IMG_PATH+'main menu/logo', sizeup=3),
             'bat' : load_images_from_folder(IMG_PATH+'main menu/bat',sizeup=3),
+            
+            
+            'weapons' : {
+                'axe': pygame.image.load(IMG_PATH+ 'weapons/axe.png'), 
+                'axe2': pygame.image.load(IMG_PATH+ 'weapons/axe.png'), 
+
+            },
+            
             
             'player' : {
                 'idle' :{
@@ -243,6 +253,7 @@ class Game:
     
     def __init__(self):
         
+        self.fps_cap_choice = 5 if debug else 0
         self.next_save = pygame.time.get_ticks() + 15000
         
         self.zoom =2
@@ -257,6 +268,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.fps_cap = 10000
         self.time = 100
+        
         
         self.load_assets()
         
@@ -380,6 +392,12 @@ class Game:
     def goto_main_menu(self):
         
         self.save_all_data()
+        
+        self.player.inventory.open = False
+        self.time = 100
+            
+        self.player.inventory.update(100)
+        
         self.state = 'menu'
         
     def draw_text(self, writing:Writing, text:str, pos:(0,0), color=(255,255,255)):
@@ -620,8 +638,6 @@ class Game:
         if self.state == 'game':
             
             self.display = self.dis_with_bcg.copy()
-            
-
     
             self._move_sprites()
             
@@ -716,8 +732,10 @@ class Game:
                         if button.rect.collidepoint(*self.mouse_pos):
                             continue
                         
-                        if len(self.bat_pos) > 60:
-                            self.bat_pos.remove(self.bat_pos[0])
+                    if len(self.bat_pos) > 60:
+                        self.bat_pos.remove(self.bat_pos[0])
+                        
+                    if self.state == 'menu':
                     
                         self.bat_pos.append((self.mouse_pos[0]-25, self.mouse_pos[1]-15))
                     

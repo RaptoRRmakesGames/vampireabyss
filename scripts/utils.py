@@ -20,3 +20,17 @@ def load_images_from_folder(folder_path, rotation = 0, flip=False, sizeup= 1):
             except pygame.error as e:
                 print(f"Error loading image {filename}: {e}")
     return images
+
+def get_images_from_spritesheet(img: pygame.Surface, single_img_x):
+    
+    imgs = []
+    
+    iters = img.get_width() // single_img_x
+    
+    for i in range(iters):
+        
+        sub = img.subsurface(pygame.Rect(single_img_x * i, 0, single_img_x, img.get_height()))
+        
+        imgs.append(sub)
+        
+    return imgs

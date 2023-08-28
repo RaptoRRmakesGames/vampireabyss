@@ -32,24 +32,28 @@ class Inventory:
         self.max_y = 400
         self.least_y = 300
         
-        self.item_positions = [(self.rect.center[0] - self.rect.width//2 - 15+ (45* i), self.least_y+20 ) for i in range(1, 12)]
+        self.item_positions = [(self.rect.center[0] - self.rect.width//2 - 12 +(45* i), self.least_y+20 ) for i in range(1, 12)]
         
         self.vel = 0
         
         self.writing = Writing(10)
         
-
         
-        blue = pygame.Surface((32,32)).convert_alpha()
-        blue.fill((0,0,255))
+        self.weapon_surf = pygame.Surface((32,32)).convert_alpha()
+        self.weapon_surf.fill((150,255,255))
         
-        for i in range(200):
-            self.add_item(Item('tourououo', 'Pizza', blue))
+        self.util_surf = pygame.Surface((32,32)).convert_alpha()
+        self.util_surf.fill((255,255,150))
+        
+        self.item_background_colors = {
             
-
-        self.add_item(Item('tourououo', 'Pizza', blue))
+            'weapon' : self.weapon_surf,
+            'util' : self.util_surf,
+            
+        }
         
-        # print(self.items, "\n\n",self.rendered_dict)
+        self.add_item(Item('weapon', 'Axe', self.player.game.assets['weapons']['axe']))
+        self.add_item(Item('util', 'util', self.player.game.assets['weapons']['axe']))
         
     def get_tag_list(self):
         
@@ -57,7 +61,7 @@ class Inventory:
         
     def add_item(self, item):
         
-        if len(self.items.keys()) < 10 or item.tag in self.get_tag_list():
+        if len(self.items.keys()) < 10 or item.name in self.get_tag_list():
         
             if item.tag == 'powerup':
                 
@@ -84,11 +88,11 @@ class Inventory:
                     
                     return
             
-            if item.tag in list(self.items.keys()):
-                self.items[item.tag].append(item)
+            if item.name in list(self.items.keys()):
+                self.items[item.name].append(item)
             else:
-                self.items[item.tag] = []
-                self.items[item.tag].append(item)
+                self.items[item.name] = []
+                self.items[item.name].append(item)
                 
             self.refresh_stuff()
             
@@ -142,24 +146,30 @@ class Inventory:
         
         if display.get_rect().colliderect(self.rect):
             
-            pygame.draw.rect(display, (200,200,200), self.rect)
+            pygame.draw.rect(display, (100,100,100), self.rect)
             pygame.draw.rect(display, (0,0,0), self.rect, 5)
             
             for x, itemkey in enumerate(list(self.rendered_dict.keys())):
+                
                 
                 item_list = self.rendered_dict[itemkey]
                 
                 item_count = item_list[1]
                 
+                
                 pos = [self.item_positions[x][0], self.item_positions[x][1] -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
 
-                display.blit(item_list[0].image, pos)
+                display.blit(self.item_background_colors[item_list[0].tag], (pos))
+
+                display.blit(item_list[0].image, (pos[0] + 4, pos[1] + 3))
                 
                 text = self.writing.write(str(item_count), pygame.Color(255,255,255))
                 
                 text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
+                
+                
                         
-                display.blit(text, text_rect.topleft)
+                display.blit(text, text_rect.topleft) if item_count > 1 else 0
 
 class Player:
     
@@ -188,7 +198,6 @@ class Player:
         self.damage = 1
         self.powers = {'speed': 1, 'damage' : 1,'dash_strength' : 1 }
         self.base_powers = {'speed': 1, 'damage' : 1,'dash_strength' : 1 }
-        
         
         self.hp = 3
         self.max_hp = 3
@@ -278,6 +287,15 @@ class Player:
         if pygame.time.get_ticks() > self.time_till_next_dash and not self.can_dash and not k[pygame.K_LSHIFT]:
             
             self.can_dash = True
+            
+    def normalise_speed(self):
+        
+        try:
+            self.dx, self.dy = pygame.math.Vector2(self.dx, self.dy).normalize()
+            #self.velocity = self.velocity.normalize()
+        except ValueError:
+            
+            return
         
     def keep_in_locked_room(self):
         
@@ -499,27 +517,43 @@ class Player:
     
     def update(self, scroll, dt):
         k = pygame.key.get_pressed()
-        self.velocity.x += (k[pygame.K_d] - k[pygame.K_a]) * self.speed * self.powers['speed'] * dt * max(1,self.dash * self.dash_strength)
-        self.velocity.y += (k[pygame.K_s] - k[pygame.K_w]) * self.speed * self.powers['speed'] * dt * max(1,self.dash * self.dash_strength)
-        
-        self.cap_velocity(1.5 * self.powers['speed'] * max(1,self.dash * self.dash_strength)) if not self.dash else 0
-        
+
+        # Create a Vector2 instance for velocity
+        velocity_change = pygame.math.Vector2(
+            (k[pygame.K_d] - k[pygame.K_a]) * self.speed * self.powers['speed'] * dt * max(1, self.dash * self.dash_strength),
+            (k[pygame.K_s] - k[pygame.K_w]) * self.speed * self.powers['speed'] * dt * max(1, self.dash * self.dash_strength)
+        )
+
+        # Normalize the velocity change vector
+        try:
+            velocity_change.normalize_ip()
+        except Exception:
+            pass
+
+        # Add the normalized velocity change to the current velocity
+        self.velocity += velocity_change
+
+        self.cap_velocity(1.5 * self.powers['speed'] * max(1, self.dash * self.dash_strength)) if not self.dash else 0
+
         self.dx, self.dy = self.velocity.x, self.velocity.y
-        
-        self.slow_velocity(0.05 ,dt) 
-        
+
+        self.slow_velocity(0.05, dt)
+
         self.update_anims()
-        
+
         self.dashing()
 
         self.update_orientation(scroll)
-        
+
         self.update_combat()
-        
+
         self.render_rect = pygame.FRect(self.rect.x - 0, self.rect.y - 0, self.rect.width, self.rect.height)
+
         
     def apply_movement(self, dt):
         
+        
+        # self.normalise_speed()
         self.rect.x += self.dx * dt
         self.rect.y += self.dy * dt
         # print(round(self.dx * dt), round(self.dy * dt))
