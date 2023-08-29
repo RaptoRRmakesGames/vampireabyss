@@ -162,9 +162,9 @@ class Dungeon:
                 
                 render_rect = pygame.FRect(grid[1].rect.x - offset[0], grid[1].rect.y - offset[1], grid[1].rect.width, grid[1].rect.height)   
                 
-                if display.get_rect().colliderect(render_rect):
+                if display.get_rect().colliderect(pygame.FRect(render_rect.x - 16, render_rect.y - 16, ROOM_SIZE + 32, ROOM_SIZE + 32)):
                     
-                    room_poses.append((grid[1].image, render_rect.topleft))
+                    room_poses.append((grid[1].image, (render_rect.x - 16, render_rect.y - 16)))
                     # grid[1].render(display, offset)
                     
         display.blits(room_poses)

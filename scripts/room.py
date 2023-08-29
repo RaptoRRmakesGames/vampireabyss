@@ -68,7 +68,7 @@ class Room:
 
 
         pygame.draw.rect(display, (40,40,40), render_rect,)
-        display.blit(self.image, render_rect.topleft)
+        # display.blit(self.image,( render_rect.x - 0, render_rect.y - 0))
         # display.blit(room_writing.write(str(self.has_player), pygame.Color(255,255,255)),( self.rect.center[0] - offset[0], self.rect.center[1] - offset[1]))
         
         

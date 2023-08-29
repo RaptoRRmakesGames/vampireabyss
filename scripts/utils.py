@@ -40,57 +40,59 @@ def get_images_from_spritesheet(img: pygame.Surface, single_img_x):
 
 def create_room_img():
     
-    tiles = get_images_from_spritesheet(pygame.image.load('assets/images/world/room_tiles.png'), 16)
+    tiles = get_images_from_spritesheet(pygame.image.load('assets/images/world/room_tiles.png').convert_alpha(), 16)
     
-    img = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
+    img = pygame.Surface((ROOM_SIZE + 32, ROOM_SIZE + 32))
     
-    for x in range(ROOM_SIZE//16):
+    for x in range((ROOM_SIZE+ 32)//16):
         
-        for y in range(ROOM_SIZE//16):
+        for y in range((ROOM_SIZE+ 32)//16):
             
             crd = (x * 16, y * 16)
             
             if y == 0 and x == 0:
-                img.blit(tiles[choice([5,5,5,14])], crd)
+                img.blit(tiles[choice([5,5,5,5])], crd)
                 
                 continue
             
-            if y == 27 and x == 0:
-                img.blit(tiles[choice([6,6,6, 15])], crd)
+            if y == 29 and x == 0:
+                img.blit(tiles[choice([6,6,6, 6])], crd)
                 
                 continue
             
-            if y == 0 and x == 27:
-                img.blit(tiles[choice([8,8,8,17])], crd)
+            if y == 0 and x == 29:
+                img.blit(tiles[choice([8,8,8,8])], crd)
                 
                 continue
             
-            if y == 27 and x == 27:
-                img.blit(tiles[choice([7,7,7,16])], crd)
+            if y == 29 and x == 29:
+                img.blit(tiles[choice([7,7,7,7])], crd)
                 
                 continue
             
             if y == 0:
                 
-                img.blit(tiles[choice([1,1,1,10])], crd)
+                img.blit(tiles[choice([1,1,1,1])], crd)
                 continue
                 
             
-            if y == 27:
+            if y == 29:
                 
-                img.blit(tiles[choice([3,3,3,12])], crd)
+                img.blit(tiles[choice([3,3,3,3])], crd)
                 continue
                 
             if x == 0:
                 
-                img.blit(tiles[choice([2,2,2,11])], crd)
+                img.blit(tiles[choice([2,2,2,2])], crd)
                 continue
             
-            if x == 27:
+            if x == 29:
                 
-                img.blit(tiles[choice([4,4,4,13])], crd)
+                img.blit(tiles[choice([4,4,4,4])], crd)
                 continue
             
-            img.blit(tiles[choice([0,0,0,9])], crd)
+            img.blit(tiles[choice([0,0,0,0])], crd)
             
+            
+    img.convert_alpha()
     return img
