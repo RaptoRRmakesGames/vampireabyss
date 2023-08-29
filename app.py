@@ -147,7 +147,7 @@ class Game:
 
         darkensurf = pygame.Surface(self.display.get_size()).convert_alpha()
         
-        self.darken = 150
+        self.darken = 100
         
         darkensurf.fill((self.darken, self.darken, self.darken))
         
@@ -358,7 +358,7 @@ class Game:
         
         self.time_from_start = time()
         
-        self.bat_pos = self.generate_bats(8)
+        self.bat_pos = self.generate_bats(15)
         
     def generate_bats(self, n):
         
@@ -442,12 +442,17 @@ class Game:
         self.bat_anim.update()
         
         
+        # for pos in self.bat_pos:
+        outline_img = self.cached_outlines[self.bat_anim.get_image()]
         for pos in self.bat_pos:
-            outline_img = self.cached_outlines[self.bat_anim.get_image()]
             draw_lighted_image(self.display, self.assets['bat_glow'], (pos[0] - 24, pos[1]- 31))
-            self.display.blit(self.bat_anim.get_image(),(pos))   
-            self.display.blit(outline_img,(pos) )
-            
+            # self.display.blit(self.bat_anim.get_image(),(pos))   
+            # self.display.blit(outline_img,(pos) )
+        
+        # self.display.blits((self.assets['bat_glow'], (pos[0]-24, pos[1]-32)) for pos in self.bat_pos)    
+        self.display.blits((self.bat_anim.get_image(), pos) for pos in self.bat_pos)
+        self.display.blits((outline_img, pos) for pos in self.bat_pos)
+        
         
         
         self.display.blit(self.main_menu_anim.get_image(),(self.display.get_width()//2 - 125, 40) )   
@@ -763,10 +768,12 @@ class Game:
                         
                     if event.key == pygame.K_ESCAPE:
                         
-                        self.main_menu_buttons[0].text = 'Continue'
-                        self.main_menu_buttons[0].cto = (-30, -4)
-                        
-                        self.goto_main_menu()
+                        if self.state == 'game':
+                            
+                            self.main_menu_buttons[0].text = 'Continue'
+                            self.main_menu_buttons[0].cto = (-30, -4)
+                            
+                            self.goto_main_menu()
                     
                     if event.key == pygame.K_p:
                         

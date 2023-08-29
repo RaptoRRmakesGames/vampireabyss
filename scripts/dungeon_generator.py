@@ -150,7 +150,8 @@ class Dungeon:
                 
         return roomlist
         
-    def render_rooms(self, display, offset=(0,0)):
+    def render_rooms(self, display: pygame.Surface, offset=(0,0)):
+        room_poses= []
         for room in self.rooms:
             
             
@@ -162,7 +163,11 @@ class Dungeon:
                 render_rect = pygame.FRect(grid[1].rect.x - offset[0], grid[1].rect.y - offset[1], grid[1].rect.width, grid[1].rect.height)   
                 
                 if display.get_rect().colliderect(render_rect):
-                    grid[1].render(display, offset)
+                    
+                    room_poses.append((grid[1].image, render_rect.topleft))
+                    # grid[1].render(display, offset)
+                    
+        display.blits(room_poses)
                     
         # display.blit(room_writing.write(f'level: {self.level}', pygame.Color(255,255,255)), (self.middle_room_pos[0] - offset[0] - 40, self.middle_room_pos[1] - offset[1] - 8))
                     
@@ -209,8 +214,7 @@ class Dungeon:
     def copy(self):
        return Dungeon(self.game, self.width, self.height, self.level + 1)
 
-        
-    
+
 
 if __name__ == '__main__':
     d = Dungeon(5,5)
