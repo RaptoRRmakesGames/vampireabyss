@@ -539,6 +539,8 @@ class Game:
         
         self.player.render(self.display, self.scroll)
         
+        self.display.blit(self.player.inventory.selected_item.image, pygame.mouse.get_pos()) if self.player.inventory.selected_item else 0 
+        
     def _collisions(self):
         
         self.keep_player_in_rooms()
@@ -585,10 +587,7 @@ class Game:
           
                 )
             )
-            
 
-            
-            
         else:
             draw_lighted_image(
                 self.assets['darken'],
@@ -658,23 +657,16 @@ class Game:
             
         elif self.state == 'menu' :
             self.display.fill(self.main_menu_color)
-            #self.display = self.darker_surf.copy()
+
             
             self.main_menu()
             
         elif self.state == 'settings':
             self.display.fill(self.main_menu_color)
-            #self.display = self.darker_surf.copy()
             
             self.settings()
             
         self.draw_cursor()
-        
-        # self.screen.blit(pygame.transform.scale(self.display, (self.screen.get_width(),self.screen.get_height())), (0,0)) 
-        
-        # if self.state == 'game':
-            
-        #     self.minimap.render(self.screen, self.player) # fuck out of here
 
         self.scroll_speed = 55 / self.player.powers['speed']
         
@@ -743,12 +735,6 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     
                     # refresh dungeon
-                    if event.key == pygame.K_4:
-                        self.do_lighting = not self.do_lighting
-                    
-                    if event.key == pygame.K_3:
-                        
-                        self.player.state = 'demontime' if self.player.state == 'regular' else 'regular'
                         
                     if event.key == pygame.K_TAB:
                         
@@ -788,6 +774,13 @@ class Game:
                     if event.key == pygame.K_f:
                         
                         print(self.clock.get_fps())
+                        
+                    for i,  k in enumerate(self.player.inventory.slot_binds):
+                        
+                        if event.key == k:
+                            
+                            self.player.inventory.selected_item = list(self.player.inventory.items.values())[i][0]
+                            
             # update the screen
             pygame.display.update()
             

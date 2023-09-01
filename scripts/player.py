@@ -15,6 +15,14 @@ class Item:
         self.name = name 
         self.image = img
         self.rect = pygame.Rect(0,0, 36,36)
+        
+    def list(self):
+        
+        return  '{}, {}'.format(self.tag, self.name)
+        
+    def __str__(self):
+        
+        return '{}, {}'.format(self.tag, self.name)
 
 class Inventory:
     
@@ -32,11 +40,13 @@ class Inventory:
         self.max_y = 400
         self.least_y = 300
         
-        self.item_positions = [(self.rect.center[0] - self.rect.width//2 - 12 +(45* i), self.least_y+20 ) for i in range(1, 12)]
+        self.item_positions = [(self.rect.center[0] - self.rect.width//2 + 47 +(50* i), self.least_y+20 ) for i in range(1, 7)]
         
         self.vel = 0
         
         self.writing = Writing(10)
+        
+        self.selected_item=  None
         
         
         self.weapon_surf = pygame.Surface((32,32)).convert_alpha()
@@ -45,15 +55,25 @@ class Inventory:
         self.util_surf = pygame.Surface((32,32)).convert_alpha()
         self.util_surf.fill((255,255,150))
         
+        self.test_surf = pygame.Surface((32,32)).convert_alpha()
+        self.test_surf.fill((255,255,255))
+        
         self.item_background_colors = {
             
             'weapon' : self.weapon_surf,
             'util' : self.util_surf,
+            'test': self.test_surf
             
         }
         
         self.add_item(Item('weapon', 'Axe', self.player.game.assets['weapons']['axe']))
         self.add_item(Item('util', 'util', self.player.game.assets['weapons']['axe']))
+        self.add_item(Item('weapon', 'test', self.player.game.assets['weapons']['axe']))
+        self.add_item(Item('weapon', '3', self.player.game.assets['weapons']['axe']))
+        self.add_item(Item('weapon', '4', self.player.game.assets['weapons']['axe']))
+        self.add_item(Item('weapon', '5', self.player.game.assets['weapons']['axe']))
+        
+        self.slot_binds = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6]
         
     def get_tag_list(self):
         
@@ -167,9 +187,11 @@ class Inventory:
                 
                 text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
                 
-                
-                        
                 display.blit(text, text_rect.topleft) if item_count > 1 else 0
+                
+                if self.selected_item and item_list[0].name == self.selected_item.name:
+                    
+                    pygame.draw.circle(display, (255,255,255), (pos[0] + 15, pos[1] + 15), 20, 5)
 
 class Player:
     
