@@ -291,7 +291,7 @@ class Game:
         
         self.dungeon = Dungeon(self, *self.room_count, 1)
         self.player = Player(self.dungeon.middle_room_pos, 0.1, self.dungeon.middle_room, self)
-        self.minimap = Minimap(self, (self.display.get_width() - 195,20), (75,75))
+        self.minimap = Minimap(self, (self.display.get_width() - 110,10), (100,100))
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
