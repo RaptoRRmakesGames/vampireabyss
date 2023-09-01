@@ -61,7 +61,7 @@ class Minimap:
             player.rect.y // self.diffrence_x - self.game.dungeon.leftest//self.diffrence_x + 400 //self.diffrence_x + 35,
             player.rect.width* 5 // self.diffrence_x,
             player.rect.height * 5 // self.diffrence_x - 70)
-        pygame.draw.circle(self.background, (0,250,150), player_rect.center, 4)
-        pygame.draw.circle(self.background, (0,0,0), player_rect.center, 4, 2)
+        pygame.draw.circle(self.background, (0,250,150), player_rect.center, 1)
+        pygame.draw.circle(self.background, (0,0,0), player_rect.center, 1, 2)
        
         display.blit(self.background, self.pos)

@@ -25,6 +25,7 @@ pygame.init()
 pygame.display.init()
 pygame.mouse.set_visible(False)
 pygame.display.set_caption("Vampire's Abyss")
+pygame.display.set_icon(pygame.image.load('assets/logo/logo.png'))
 
 def change_color(img,  new_color):
     for x in range(img.get_width()):
@@ -257,12 +258,9 @@ class Game:
         self.zoom =2
         
         flags = pygame.SCALED | pygame.FULLSCREEN if not debug else 0
-        self.screen = pygame.display.set_mode((1280, 720), flags=flags)
-        self.display = pygame.Surface((1280//self.zoom, 720//self.zoom)).convert_alpha()
-        self.dis_with_bcg = self.display
-        self.dis_with_bcg.fill((36,45,52))
-        self.darker_surf = self.display
-        self.darker_surf.fill((12,15,28))
+        self.display = pygame.display.set_mode((1280/self.zoom, 720/self.zoom), flags=flags)
+        self.main_menu_color = (16,18,28)
+        self.game_color = (12,15,28)
         self.clock = pygame.time.Clock()
         self.fps_cap = 10000
         self.time = 100
@@ -293,7 +291,7 @@ class Game:
         
         self.dungeon = Dungeon(self, *self.room_count, 1)
         self.player = Player(self.dungeon.middle_room_pos, 0.1, self.dungeon.middle_room, self)
-        self.minimap = Minimap(self, (self.screen.get_width() - 195,20), (175,175))
+        self.minimap = Minimap(self, (self.display.get_width() - 195,20), (75,75))
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
@@ -522,6 +520,8 @@ class Game:
   
         # if self.player.inventory.open:
         self.player.inventory.render(self.display)
+        
+        self.minimap.render(self.display, self.player)
     
     def _render_sprites(self):
         
@@ -630,17 +630,15 @@ class Game:
     
     def update(self):
         
-        #self.pause = self.player.inventory.open
-        
         self.save_all_every(30000)
         
         self.dt = self.get_dt()
         
-        self.mouse_pos = pygame.mouse.get_pos()[0]/ self.zoom, pygame.mouse.get_pos()[1] / self.zoom
+        self.mouse_pos = pygame.mouse.get_pos()[0] , pygame.mouse.get_pos()[1] 
 
         if self.state == 'game':
             
-            self.display = self.dis_with_bcg.copy()
+            self.display.fill(self.game_color) 
     
             self._move_sprites()
             
@@ -659,24 +657,24 @@ class Game:
             self.update_ui()
             
         elif self.state == 'menu' :
-            
-            self.display = self.darker_surf.copy()
+            self.display.fill(self.main_menu_color)
+            #self.display = self.darker_surf.copy()
             
             self.main_menu()
             
         elif self.state == 'settings':
-            
-            self.display = self.darker_surf.copy()
+            self.display.fill(self.main_menu_color)
+            #self.display = self.darker_surf.copy()
             
             self.settings()
             
         self.draw_cursor()
         
-        self.screen.blit(pygame.transform.scale(self.display, (self.screen.get_width(),self.screen.get_height())), (0,0)) 
+        # self.screen.blit(pygame.transform.scale(self.display, (self.screen.get_width(),self.screen.get_height())), (0,0)) 
         
-        if self.state == 'game':
+        # if self.state == 'game':
             
-            self.minimap.render(self.screen, self.player) # fuck out of here
+        #     self.minimap.render(self.screen, self.player) # fuck out of here
 
         self.scroll_speed = 55 / self.player.powers['speed']
         

@@ -458,7 +458,7 @@ class Player:
     
     def update_orientation(self, scroll):
         
-        self.pos = pygame.math.Vector2(self.rect.center) + pygame.math.Vector2(400 + 29,300 - 57)
+        self.pos = pygame.math.Vector2(self.rect.center)
         self.mouse_pos = pygame.math.Vector2(pygame.mouse.get_pos()) + scroll  # Consider the scroll offset
 
         angle_to_mouse = self.pos - self.mouse_pos  # Calculate the vector pointing to the mouse
