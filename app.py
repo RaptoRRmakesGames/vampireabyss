@@ -779,7 +779,7 @@ class Game:
                         
                         if event.key == k:
                             
-                            self.player.inventory.selected_item = list(self.player.inventory.items.values())[i][0]
+                            self.player.inventory.selected_item = list(self.player.inventory.items.values())[i][0] if self.player.inventory.selected_item != list(self.player.inventory.items.values())[i][0] else None
                             
             # update the screen
             pygame.display.update()

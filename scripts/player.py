@@ -66,6 +66,8 @@ class Inventory:
             
         }
         
+        self.clicked = False
+        
         self.add_item(Item('weapon', 'Axe', self.player.game.assets['weapons']['axe']))
         self.add_item(Item('util', 'util', self.player.game.assets['weapons']['axe']))
         self.add_item(Item('weapon', 'test', self.player.game.assets['weapons']['axe']))
@@ -192,6 +194,22 @@ class Inventory:
                 if self.selected_item and item_list[0].name == self.selected_item.name:
                     
                     pygame.draw.circle(display, (255,255,255), (pos[0] + 15, pos[1] + 15), 20, 5)
+                    
+                col_rect = pygame.Rect(*pos, item_list[0].image.get_rect().width, item_list[0].image.get_rect().height)
+                
+                if col_rect.collidepoint(pygame.mouse.get_pos()):
+                    
+                    if pygame.mouse.get_pressed()[0] and not self.clicked:
+                        
+                        self.selected_item = item_list[0] if self.selected_item != item_list[0] else None
+                        
+                        self.clicked = True
+                        
+                if not pygame.mouse.get_pressed()[0]:
+                    
+                    self.clicked = False
+                    
+                
 
 class Player:
     
@@ -571,7 +589,6 @@ class Player:
 
         self.render_rect = pygame.FRect(self.rect.x - 0, self.rect.y - 0, self.rect.width, self.rect.height)
 
-        
     def apply_movement(self, dt):
         
         
@@ -584,91 +601,94 @@ class Player:
         keys = pygame.key.get_pressed()
         
         now_attack = 'right' if self.last_attack_turn == 'left' else 'left'
-        
-        if keys[pygame.K_LCTRL] and self.can_attack:
-            self.can_attack = False
-            
-            self.last_attack_type = 'big'
-            
-            self.animator.set_anim('bigpunch_'+self.ori+'_'+now_attack)
-            self.last_attack_turn = now_attack
-            
-            if self.ori == 'up':
-                top = self.rect.y - 32
-                left = self.rect.x - 7
-                width_height = (32 + 14,32)
-            if self.ori == 'down':
-                top = self.rect.y + self.rect.width 
-                left = self.rect.x - 7
-                width_height = (32 + 14,32)
+        if not self.inventory.open:
+            if keys[pygame.K_LCTRL] and self.can_attack:
+                self.can_attack = False
                 
-            if self.ori == 'left':
-                top = self.rect.y - 7
-                left = self.rect.x - 32
-                width_height = (32,32 + 14)
+                self.last_attack_type = 'big'
                 
-            if self.ori == 'right':
-                top = self.rect.y - 7
-                left = self.rect.x + self.rect.width 
-                width_height = (32,32 + 14)
+                self.animator.set_anim('bigpunch_'+self.ori+'_'+now_attack)
+                self.last_attack_turn = now_attack
+                
+                if self.ori == 'up':
+                    top = self.rect.y - 32
+                    left = self.rect.x - 7
+                    width_height = (32 + 14,32)
+                if self.ori == 'down':
+                    top = self.rect.y + self.rect.width 
+                    left = self.rect.x - 7
+                    width_height = (32 + 14,32)
+                    
+                if self.ori == 'left':
+                    top = self.rect.y - 7
+                    left = self.rect.x - 32
+                    width_height = (32,32 + 14)
+                    
+                if self.ori == 'right':
+                    top = self.rect.y - 7
+                    left = self.rect.x + self.rect.width 
+                    width_height = (32,32 + 14)
 
-            self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage'] *1.5))
-            
-            self.attacking = True
-            
-            self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval + 150
-        
-        if keys[pygame.K_SPACE] and self.can_attack:
-            
-            self.last_attack_type = 'small'
-            
-            self.can_attack = False
-            
-            self.animator.set_anim('punch'+'_'+self.ori+'_'+now_attack)
-            self.last_attack_turn = now_attack
-            
-            if self.ori == 'up':
-                top = self.rect.y - 32
-                left = self.rect.x - 7
-                width_height = (32 + 14,32)
-            if self.ori == 'down':
-                top = self.rect.y + self.rect.width 
-                left = self.rect.x - 7
-                width_height = (32 + 14,32)
+                self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage'] *1.5))
                 
-            if self.ori == 'left':
-                top = self.rect.y - 7
-                left = self.rect.x - 32
-                width_height = (32,32 + 14)
-    
-            if self.ori == 'right':
-                top = self.rect.y - 7
-                left = self.rect.x + self.rect.width 
-                width_height = (32,32 + 14)
+                self.attacking = True
+                
+                self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval + 150
+            
+            if keys[pygame.K_SPACE] and self.can_attack:
+                
+                self.last_attack_type = 'small'
+                
+                self.can_attack = False
+                
+                self.animator.set_anim('punch'+'_'+self.ori+'_'+now_attack)
+                self.last_attack_turn = now_attack
+                
+                if self.ori == 'up':
+                    top = self.rect.y - 32
+                    left = self.rect.x - 7
+                    width_height = (32 + 14,32)
+                if self.ori == 'down':
+                    top = self.rect.y + self.rect.width 
+                    left = self.rect.x - 7
+                    width_height = (32 + 14,32)
+                    
+                if self.ori == 'left':
+                    top = self.rect.y - 7
+                    left = self.rect.x - 32
+                    width_height = (32,32 + 14)
+        
+                if self.ori == 'right':
+                    top = self.rect.y - 7
+                    left = self.rect.x + self.rect.width 
+                    width_height = (32,32 + 14)
 
-            self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage']))
-    
-            self.attacking = True
-            
-            self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval
-            
-            
-        if pygame.time.get_ticks() > self.stop_attack_time and self.attacking:
-            
-            self.attacking = False
+                self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage']))
+        
+                self.attacking = True
+                
+                self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval
+                
+                
+            if pygame.time.get_ticks() > self.stop_attack_time and self.attacking:
+                
+                self.attacking = False
+                
+                self.hitboxes = []
+                
+                if self.last_attack_type == 'big':
+                
+                    self.next_attack = pygame.time.get_ticks() + self.attack_interval + 150
+                    
+                else:
+                    self.next_attack = pygame.time.get_ticks() + self.attack_interval
+                
+            if pygame.time.get_ticks() > self.next_attack and not self.can_attack and not self.attacking:
+                
+                self.can_attack = True
+        else:
             
             self.hitboxes = []
-            
-            if self.last_attack_type == 'big':
-            
-                self.next_attack = pygame.time.get_ticks() + self.attack_interval + 150
-                
-            else:
-                self.next_attack = pygame.time.get_ticks() + self.attack_interval
-            
-        if pygame.time.get_ticks() > self.next_attack and not self.can_attack and not self.attacking:
-            
-            self.can_attack = True
                
     def render(self, display, offset, nocap=True):
         self.render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
