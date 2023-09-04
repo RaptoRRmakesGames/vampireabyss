@@ -290,8 +290,9 @@ class Game:
         self.cache_common_colors()
         
         self.dungeon = Dungeon(self, *self.room_count, 1)
-        self.player = Player(self.dungeon.middle_room_pos, 0.1, self.dungeon.middle_room, self)
         self.minimap = Minimap(self, (self.display.get_width() - 110,10), (100,100))
+        self.player = Player(self.dungeon.middle_room_pos, 0.1, self.dungeon.middle_room, self)
+        
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
@@ -335,7 +336,7 @@ class Game:
             
             self.cached_outlines[img] = outline(img)
 
-        self.mouse_pos = pygame.mouse.get_pos()
+        self.mouse_pos = list(pygame.mouse.get_pos())
         
         self.time_till_close = pygame.time.get_ticks() + 7500
         self.frames = []
@@ -633,7 +634,9 @@ class Game:
         
         self.dt = self.get_dt()
         
-        self.mouse_pos = pygame.mouse.get_pos()[0] , pygame.mouse.get_pos()[1] 
+        mx, my = pygame.mouse.get_pos()
+        
+        self.mouse_pos = [mx, my]
 
         if self.state == 'game':
             
@@ -682,6 +685,9 @@ class Game:
         # move the camera
         self.camera_target[0] += ((target_x - self.camera_target[0]) / self.scroll_speed) *self.dt
         self.camera_target[1] += ((target_y - self.camera_target[1]) / self.scroll_speed)*self.dt
+        
+
+    
         # Apply the camera target position as the scroll position
         
         
@@ -694,9 +700,11 @@ class Game:
         run = True
         while run:
             
+
+            
             # cap the framerate
             
-            self.clock.tick(self.fps_cap)
+            self.clock.tick_busy_loop(self.fps_cap)
             
             # update everything in the game
             
@@ -783,6 +791,10 @@ class Game:
                             
             # update the screen
             pygame.display.update()
+            
+            if (self.clock.get_fps() > 600 and self.fps_cap != 600):
+                
+                self.fps_cap = 600
             
     def get_dt(self):
         time_now = time()

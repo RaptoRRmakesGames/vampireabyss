@@ -18,24 +18,29 @@ class Minimap:
         
         self.pos = pos
         
+
         
     def feed_rooms(self, rooms):
+        
+        show_coloured_map = 'Compass' in self.game.player.inventory.get_tag_list()
+        
         self.rooms = []
         self.rooms = rooms
         self.room_surface = pygame.Surface(self.size).convert_alpha()
         for room in self.rooms:
             color = (255,255,255)
-            if room.type == 'start':
-                color = (0,255,255)
-                
-            elif room.type == 'fight':
-                color = (255,0,0)
-                
-            elif room.type == 'chest':
-                color = (255,255,0)
-                
-            elif room.type == 'finish':
-                color = (100,100,0)
+            if show_coloured_map:
+                if room.type == 'start':
+                    color = (0,255,255) 
+                    
+                elif room.type == 'fight':
+                    color = (255,0,0)
+                    
+                elif room.type == 'chest':
+                    color = (255,255,0)
+                    
+                elif room.type == 'finish':
+                    color = (100,100,0)
                 
             pygame.draw.rect(self.room_surface, color, 
             pygame.Rect(

@@ -3,7 +3,7 @@ from random import randint , uniform, choice
 
 from scripts.room import Room
 from scripts.settings import *
-from scripts.player import Item
+from scripts.player import Item, item_dict
 
 
 class ItemDrop:
@@ -41,7 +41,9 @@ class ItemDrop:
         
         render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], *self.rect.size)
         
-        pygame.draw.rect(display, (255,255,255), render_rect)
+        # pygame.draw.rect(display, (255,255,255), render_rect)
+        
+        display.blit(self.drop.image, render_rect.topleft)
             
         
         
@@ -64,9 +66,15 @@ class Enemy:
         
         self.knockback_toughness = round(uniform(self.health/4,self.health/2), 1)
         
-        img = pygame.Surface((0,0))
-        img.fill((255,255,255))
-        self.drop = ItemDrop(Item('powerup', choice(['health','health','health','health', 'maxhealth']), img), self.rect.center)
+        red_img = pygame.Surface((32,32))
+        red_img.fill((255,0,0))
+        
+        pwr_drop = ItemDrop(Item('powerup', 'health',red_img ), (self.rect.center))
+        compass_drop = ItemDrop(item_dict['compass'], self.rect.center)
+        
+        drop = choice([pwr_drop, compass_drop])
+        
+        self.drop = drop#ItemDrop(choice([Item('powerup', choice(['health','health','health','health', 'maxhealth']),item_dict['compass'] ])), img, self.rect.center)
         
         self.attacking = False
         self.dead = False

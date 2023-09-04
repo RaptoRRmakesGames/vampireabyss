@@ -7,14 +7,18 @@ from scripts.writing import Writing
 from scripts.settings import coin_multi
 from scripts.animations import Animation, Animator
 
+
+
 class Item:
     
-    def __init__(self, tag, name, img: pygame.Surface):
+    def __init__(self, tag, name, img: pygame.Surface, stack_size=-1):
         
         self.tag = tag 
         self.name = name 
         self.image = img
         self.rect = pygame.Rect(0,0, 36,36)
+        
+        self.stack_size = stack_size
         
     def list(self):
         
@@ -23,6 +27,10 @@ class Item:
     def __str__(self):
         
         return '{}, {}'.format(self.tag, self.name)
+    
+item_dict = {
+    'compass' : Item('util', 'Compass', pygame.image.load('assets/images/icons/compass.png').convert_alpha()),
+}
 
 class Inventory:
     
@@ -48,7 +56,6 @@ class Inventory:
         
         self.selected_item=  None
         
-        
         self.weapon_surf = pygame.Surface((32,32)).convert_alpha()
         self.weapon_surf.fill((150,255,255))
         
@@ -68,12 +75,7 @@ class Inventory:
         
         self.clicked = False
         
-        self.add_item(Item('weapon', 'Axe', self.player.game.assets['weapons']['axe']))
-        self.add_item(Item('util', 'util', self.player.game.assets['weapons']['axe']))
-        self.add_item(Item('weapon', 'test', self.player.game.assets['weapons']['axe']))
-        self.add_item(Item('weapon', '3', self.player.game.assets['weapons']['axe']))
-        self.add_item(Item('weapon', '4', self.player.game.assets['weapons']['axe']))
-        self.add_item(Item('weapon', '5', self.player.game.assets['weapons']['axe']))
+        self.add_item(item_dict['compass'])
         
         self.slot_binds = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6]
         
@@ -109,14 +111,18 @@ class Inventory:
                     self.player.coins += randint(17*coin_multi,23*coin_multi)
                     
                     return
-            
+
             if item.name in list(self.items.keys()):
-                self.items[item.name].append(item)
+                if len(self.items[item.name]) -1 < item.stack_size:
+                
+                    self.items[item.name].append(item)
+        
             else:
                 self.items[item.name] = []
                 self.items[item.name].append(item)
                 
             self.refresh_stuff()
+            self.affect_player()
             
     def refresh_stuff(self):
         
@@ -179,11 +185,11 @@ class Inventory:
                 item_count = item_list[1]
                 
                 
-                pos = [self.item_positions[x][0], self.item_positions[x][1] -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
+                pos = [self.item_positions[x][0] , self.item_positions[x][1]  -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
 
                 display.blit(self.item_background_colors[item_list[0].tag], (pos))
 
-                display.blit(item_list[0].image, (pos[0] + 4, pos[1] + 3))
+                display.blit(item_list[0].image, (pos[0] , pos[1] ))
                 
                 text = self.writing.write(str(item_count), pygame.Color(255,255,255))
                 
@@ -209,6 +215,20 @@ class Inventory:
                     
                     self.clicked = False
                     
+                
+    def affect_player(self):
+        
+        # self.player.game.minimap.show_coloured_map = False
+        
+        for item in list(self.items.values()):
+            item = item[0]
+            
+            if item.name == 'Compass':
+                
+                self.player.game.minimap.feed_rooms(self.player.game.dungeon.get_room_list())
+                self.player.game.minimap.feed_hallways(self.player.game.dungeon.hallways)
+                
+            print(item)
                 
 
 class Player:
