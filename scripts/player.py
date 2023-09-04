@@ -75,8 +75,6 @@ class Inventory:
         
         self.clicked = False
         
-        self.add_item(item_dict['compass'])
-        
         self.slot_binds = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6]
         
     def get_tag_list(self):
