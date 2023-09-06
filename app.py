@@ -7,7 +7,7 @@ from random import randint
 from scripts.room import Room, BlankRoom
 from scripts.dungeon_generator import Dungeon
 from scripts.minimap import Minimap
-from scripts.player import Player
+from scripts.player import Player, item_dict
 from scripts.combat_manager import CombatSystem
 from scripts.writing import Writing
 from scripts.filehandling import loadvar, savevar
@@ -15,6 +15,7 @@ from scripts.main_menu_helper import Button, MultiSelect
 from scripts.loot import SpeedUp, StrenghtUp
 from scripts.utils import load_images_from_folder
 from scripts.animations import Animation
+from scripts.start_room import Start_Room
 
 # thats all there is 
 
@@ -268,7 +269,7 @@ class Game:
         
         self.load_assets()
         
-        self.state = 'menu' if not debug else 'game'
+        self.state = 'start_room' if not debug else 'game'
         
         self.room_count = (10,10)
         
@@ -289,13 +290,17 @@ class Game:
         
         self.cache_common_colors()
         
+        self.start_room = Start_Room()
+        
         self.dungeon = Dungeon(self, *self.room_count, 1)
         self.minimap = Minimap(self, (self.display.get_width() - 110,10), (100,100))
-        self.player = Player(self.dungeon.middle_room_pos, 0.1, self.dungeon.middle_room, self)
+        self.player = Player(self.start_room.rect.center, 0.1, self.dungeon.middle_room, self)
         
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
+        
+        self.player.inventory.add_item(item_dict['compass'])
         
         self.combat_system = CombatSystem(self)
         
@@ -358,6 +363,8 @@ class Game:
         self.time_from_start = time()
         
         self.bat_pos = self.generate_bats(15)
+        
+        
         
     def generate_bats(self, n):
         
@@ -509,20 +516,24 @@ class Game:
             self.display.blit(self.writings['fps'].write(str(round(self.clock.get_fps()))+ 'fps', pygame.Color(255,255,255)) , (self.ui_cords['right'] - 45, self.ui_cords['bottom']-8))
         
         self.display.blit(self.writings['coins'].write('coins: '+str(self.player.coins), pygame.Color(255,255,0)), (5, 5))
-        self.display.blit(self.writings['coins'].write('health: '+str(self.player.hp), pygame.Color(0,250,250)), (5, 20))
+        if self.state == 'game':
+            self.display.blit(self.writings['coins'].write('health: '+str(self.player.hp), pygame.Color(0,250,250)), (5, 20))
         self.display.blit(self.writings['buffs'].write('speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', pygame.Color(0,250,250)), (5, 43))
         self.display.blit(self.writings['buffs'].write('damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', pygame.Color(0,250,250)), (5, 54))
   
-        ttime = str(round(time()-self.time_from_start,1))
-        time_surf = self.writings['timer'].write(f"{ttime.split('.')[0]}.{ttime.split('.')[1]}", pygame.Color(255,255,255))
-        time_rect = time_surf.get_rect(center = (self.display.get_width()//2, 20))
-        
-        self.display.blit(time_surf, (time_rect.x, time_rect.y))
+
   
         # if self.player.inventory.open:
         self.player.inventory.render(self.display)
         
-        self.minimap.render(self.display, self.player)
+        
+        if self.state == 'game':
+            ttime = str(round(time()-self.time_from_start,1))
+            time_surf = self.writings['timer'].write(f"{ttime.split('.')[0]}.{ttime.split('.')[1]}", pygame.Color(255,255,255))
+            time_rect = time_surf.get_rect(center = (self.display.get_width()//2, 20))
+            
+            self.display.blit(time_surf, (time_rect.x, time_rect.y))
+            self.minimap.render(self.display, self.player)
     
     def _render_sprites(self):
         
@@ -576,55 +587,75 @@ class Game:
         
         self.assets['darken'].fill((self.darken, self.darken, self.darken))
         
-        if not self.player.current_room.type == 'fight' or( self.player.curent_hallway and self.player.curent_hallway.rect.colliderect(self.player.rect)):
-            draw_lighted_image(
-                self.assets['darken'],
-                self.assets['player_light'][self.player.state],
-                (
-              
-                (self.player.render_rect.centerx) - self.light_width,
-                (self.player.render_rect.centery) - self.light_height 
-          
-          
+        if self.state == 'game':
+            
+            if not self.player.current_room.type == 'fight' or( self.player.curent_hallway and self.player.curent_hallway.rect.colliderect(self.player.rect)):
+                draw_lighted_image(
+                    self.assets['darken'],
+                    self.assets['player_light'][self.player.state],
+                    (
+                
+                    (self.player.render_rect.centerx) - self.light_width,
+                    (self.player.render_rect.centery) - self.light_height 
+            
+            
+                    )
                 )
-            )
 
-        else:
-            draw_lighted_image(
-                self.assets['darken'],
-                self.assets['room_light'],
-                (
+            else:
+                draw_lighted_image(
+                    self.assets['darken'],
+                    self.assets['room_light'],
+                    (
+                        
+                    (self.player.current_room.rect.centerx - self.scroll[0]) - self.light_width - self.player.current_room.rect.width // 2 + 0,
+                    (self.player.current_room.rect.centery - self.scroll[1]) - self.light_height - self.player.current_room.rect.height // 2 
                     
-                (self.player.current_room.rect.centerx - self.scroll[0]) - self.light_width - self.player.current_room.rect.width // 2 + 0,
-                (self.player.current_room.rect.centery - self.scroll[1]) - self.light_height - self.player.current_room.rect.height // 2 
-                
-                
+                    
+                    )
                 )
-            )
+                
             
-        
-        
-        self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
-        
-        for chest in self.dungeon.chest_manager.chests:
-            if self.display.get_rect().colliderect(chest.render_rect) and not chest.opened:
             
-                self.display.blit(self.assets['chest_glow'], (chest.rect.centerx - self.scroll[0] - self.chest_width, chest.rect.centery - self.scroll[1] - self.chest_height,), special_flags=BLEND_RGB_ADD)
+            self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
             
-        for powerup in self.dungeon.powerup_manager.powerups:
+            for chest in self.dungeon.chest_manager.chests:
+                if self.display.get_rect().colliderect(chest.render_rect) and not chest.opened:
+                
+                    self.display.blit(self.assets['chest_glow'], (chest.rect.centerx - self.scroll[0] - self.chest_width, chest.rect.centery - self.scroll[1] - self.chest_height,), special_flags=BLEND_RGB_ADD)
+                
+            for powerup in self.dungeon.powerup_manager.powerups:
+                
+                if self.display.get_rect().colliderect(powerup.render_rect):
+                    self.display.blit(self.assets['powerup_glow'][type(powerup)], (powerup.rect.centerx - self.scroll[0] - 40, powerup.rect.centery - self.scroll[1] - 40 ,), special_flags=BLEND_RGB_ADD)
             
-            if self.display.get_rect().colliderect(powerup.render_rect):
-                self.display.blit(self.assets['powerup_glow'][type(powerup)], (powerup.rect.centerx - self.scroll[0] - 40, powerup.rect.centery - self.scroll[1] - 40 ,), special_flags=BLEND_RGB_ADD)
-        self.display.blit(self.assets['new_level_block_glow'], 
-                          
-                          (
-                              
-                              (self.dungeon.next_level_block.render_rect.x - 100,
-                              self.dungeon.next_level_block.render_rect.y - 100,)
-                           
-                           )
-                          
-                          ,special_flags=BLEND_RGB_ADD)
+            if self.state == 'game':
+                self.display.blit(self.assets['new_level_block_glow'], 
+                                
+                                (
+                                    
+                                    (self.dungeon.next_level_block.render_rect.x - 100,
+                                    self.dungeon.next_level_block.render_rect.y - 100,)
+                                
+                                )
+                                
+                                ,special_flags=BLEND_RGB_ADD)
+            
+        if self.state == 'start_room':
+            
+            draw_lighted_image(
+                    self.assets['darken'],
+                    self.assets['room_light'],
+                    (
+                        
+                    (self.start_room.rect.centerx - self.scroll[0]) - self.light_width - self.start_room.rect.width // 2 + 0,
+                    (self.start_room.rect.centery - self.scroll[1]) - self.light_height - self.start_room.rect.height // 2 
+                    
+                    
+                    )
+                )
+            
+            self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
         
         self.display.blit(self.assets['vignette'], self.vignete_cord )
     
@@ -658,6 +689,62 @@ class Game:
 
             self.update_ui()
             
+        if self.state == 'start_room':
+            self.display.fill(self.game_color)
+            
+            self.update_camera()
+              
+            self.player.inventory.update(self.dt)
+            
+            
+            self.player.update(self.scroll, self.dt)
+            
+            if self.player.rect.left + self.player.dx < 310:
+                
+                self.player.rect.left = 310 
+                self.player.dx = 0
+                self.player.velocity.x = 0
+            
+            if self.player.rect.right + self.player.dx > 768:
+                
+                self.player.rect.right = 768 
+                self.player.dx = 0
+                self.player.velocity.x = 0
+                
+            if self.player.rect.top + self.player.dy < 312:
+                
+                self.player.rect.top = 312 
+                self.player.dy = 0 
+                self.player.velocity.y = 0
+                
+            if self.player.rect.bottom + self.player.dy > 740:
+                
+                self.dungeon = self.dungeon.copy()
+                self.minimap.feed_rooms(self.dungeon.get_room_list())
+                self.minimap.feed_hallways(self.dungeon.hallways)
+                self.player.set_pos(self.dungeon.middle_room_pos)
+                
+                self.time_from_start = time()
+                
+                self.state = 'game'
+            
+            
+            self.player.apply_movement(self.dt)
+            
+            self.start_room.render(self.display, self.scroll)
+            self.player.render(self.display, self.scroll, True)
+            
+            
+            if self.do_lighting:
+                self._lighting()
+            
+            
+            
+            self.player.inventory.render(self.display)
+            
+            self.update_ui()
+            
+            
         elif self.state == 'menu' :
             self.display.fill(self.main_menu_color)
 
@@ -676,12 +763,19 @@ class Game:
     def update_camera(self):
         # calculate the camera's target
         
-        if not self.player.current_room.locked:
-            target_x = self.player.rect.centerx - self.display.get_width() / 2
-            target_y = self.player.rect.centery- self.display.get_height() / 2
-        else:
-            target_x = self.player.current_room.rect.centerx  - self.display.get_width() / 2
-            target_y = self.player.current_room.rect.centery  - self.display.get_height() / 2
+        if self.state == 'game':
+        
+            if not self.player.current_room.locked:
+                target_x = self.player.rect.centerx - self.display.get_width() / 2
+                target_y = self.player.rect.centery- self.display.get_height() / 2
+            else:
+                target_x = self.player.current_room.rect.centerx  - self.display.get_width() / 2
+                target_y = self.player.current_room.rect.centery  - self.display.get_height() / 2
+                
+        elif self.state == 'start_room':
+            target_x = self.start_room.rect.centerx - self.display.get_width() / 2
+            target_y = self.start_room.rect.centery- self.display.get_height() / 2 - 70
+            
         # move the camera
         self.camera_target[0] += ((target_x - self.camera_target[0]) / self.scroll_speed) *self.dt
         self.camera_target[1] += ((target_y - self.camera_target[1]) / self.scroll_speed)*self.dt
@@ -753,20 +847,28 @@ class Game:
                     
                     if event.key == pygame.K_r:
                         
-                        self.dungeon = self.dungeon.copy()
-                        self.minimap.feed_rooms(self.dungeon.get_room_list())
-                        self.minimap.feed_hallways(self.dungeon.hallways)
-                        self.player.set_pos(self.dungeon.middle_room_pos)
-                        
+                        if self.state == 'game':
+                            
+                            self.dungeon = self.dungeon.copy()
+                            self.minimap.feed_rooms(self.dungeon.get_room_list())
+                            self.minimap.feed_hallways(self.dungeon.hallways)
+                            self.player.set_pos(self.dungeon.middle_room_pos)
+                            
                     if event.key == pygame.K_ESCAPE:
                         
-                        if self.state == 'game':
+                        if self.state == 'game' or self.state == 'start_room':
                             
                             self.main_menu_buttons[0].text = 'Continue'
                             self.main_menu_buttons[0].cto = (-30, -4)
                             
                             self.goto_main_menu()
-                    
+                            
+                    if event.key == pygame.K_b:
+                        
+                        if self.player.inventory.open and self.player.inventory.selected_item:
+                            
+                            self.player.inventory.remove_item(self.player.inventory.selected_item.name)
+                                                
                     if event.key == pygame.K_p:
                         
                         self.save_all_data()

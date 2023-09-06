@@ -73,6 +73,8 @@ class Inventory:
             
         }
         
+        
+        
         self.clicked = False
         
         self.slot_binds = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6]
@@ -80,6 +82,28 @@ class Inventory:
     def get_tag_list(self):
         
         return list(self.items.keys())
+    
+    def remove_item(self, itemname, count=1):
+        
+        
+        
+        if len(self.items[itemname]) == 1:
+        
+            self.items[itemname].pop(0)
+            
+            del self.items[itemname]
+            
+            self.refresh_stuff()
+            
+            self.affect_player()
+            
+            self.selected_item = None
+            
+            return 
+        
+        self.items[itemname].pop(0)
+        self.affect_player()
+            
         
     def add_item(self, item):
         
@@ -166,7 +190,7 @@ class Inventory:
                 
                 self.vel = 0 
                 
-        
+
                     
     def render(self, display):
         
@@ -218,13 +242,11 @@ class Inventory:
         
         # self.player.game.minimap.show_coloured_map = False
         
+        self.player.game.minimap.feed_rooms(self.player.game.dungeon.get_room_list())
+        self.player.game.minimap.feed_hallways(self.player.game.dungeon.hallways)
         for item in list(self.items.values()):
             item = item[0]
-            
-            if item.name == 'Compass':
                 
-                self.player.game.minimap.feed_rooms(self.player.game.dungeon.get_room_list())
-                self.player.game.minimap.feed_hallways(self.player.game.dungeon.hallways)
                 
             print(item)
                 
