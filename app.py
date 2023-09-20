@@ -13,9 +13,10 @@ from scripts.writing import Writing
 from scripts.filehandling import loadvar, savevar
 from scripts.main_menu_helper import Button, MultiSelect
 from scripts.loot import SpeedUp, StrenghtUp
-from scripts.utils import load_images_from_folder
+from scripts.utils import load_images_from_folder, TaskManager
 from scripts.animations import Animation
 from scripts.start_room import Start_Room
+from scripts.lighting import Lighting
 
 # thats all there is 
 
@@ -263,7 +264,7 @@ class Game:
         self.main_menu_color = (16,18,28)
         self.game_color = (12,15,28)
         self.clock = pygame.time.Clock()
-        self.fps_cap = 10000
+        self.fps_cap = 1000
         self.time = 100
         
         
@@ -363,6 +364,14 @@ class Game:
         self.time_from_start = time()
         
         self.bat_pos = self.generate_bats(15)
+        
+        self.task_manager = TaskManager()
+        
+        self.task_manager.bind(pygame.K_TAB, self.__open_player_inv)
+        self.task_manager.bind(pygame.K_r, self.__refresh_room)
+        self.task_manager.bind(pygame.K_ESCAPE, self.__main_menu)
+        self.task_manager.bind(pygame.K_q, self.__remove_inv_item)
+        self.task_manager.bind(pygame.K_b, self.__regenerate_bats)
         
         
         
@@ -788,6 +797,43 @@ class Game:
         self.scroll[0] = round(self.camera_target[0])
         self.scroll[1] = round(self.camera_target[1])
 
+    def __open_player_inv(self):          
+        self.player.inventory.open = not self.player.inventory.open
+        self.player.inventory.vel = 0
+        
+        self.time = 100 if not self.player.inventory.open else 25
+        
+    def __refresh_room(self):
+        
+        if self.state == 'game':
+                            
+            self.dungeon = self.dungeon.copy()
+            self.minimap.feed_rooms(self.dungeon.get_room_list())
+            self.minimap.feed_hallways(self.dungeon.hallways)
+            self.player.set_pos(self.dungeon.middle_room_pos)
+            
+    def __main_menu(self):
+        if self.state == 'game' or self.state == 'start_room':
+            
+            self.main_menu_buttons[0].text = 'Continue'
+            self.main_menu_buttons[0].cto = (-30, -4)
+            
+            self.goto_main_menu()
+            
+    def __remove_inv_item(self):
+        if self.player.inventory.open and self.player.inventory.selected_item:
+
+            self.player.inventory.remove_item(self.player.inventory.selected_item.name)
+            
+    def __regenerate_bats(self):
+        
+        if self.state == 'menu':
+            
+            n = randint(8, 25)
+            
+            self.bat_pos = self.generate_bats(n)    
+        
+    
     def run(self):
         # infinite game loop
         
@@ -837,54 +883,8 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     
                     # refresh dungeon
-                        
-                    if event.key == pygame.K_TAB:
-                        
-                        self.player.inventory.open = not self.player.inventory.open
-                        self.player.inventory.vel = 0
-                        
-                        self.time = 100 if not self.player.inventory.open else 25
-                    
-                    if event.key == pygame.K_r:
-                        
-                        if self.state == 'game':
-                            
-                            self.dungeon = self.dungeon.copy()
-                            self.minimap.feed_rooms(self.dungeon.get_room_list())
-                            self.minimap.feed_hallways(self.dungeon.hallways)
-                            self.player.set_pos(self.dungeon.middle_room_pos)
-                            
-                    if event.key == pygame.K_ESCAPE:
-                        
-                        if self.state == 'game' or self.state == 'start_room':
-                            
-                            self.main_menu_buttons[0].text = 'Continue'
-                            self.main_menu_buttons[0].cto = (-30, -4)
-                            
-                            self.goto_main_menu()
-                            
-                    if event.key == pygame.K_b:
-                        
-                        if self.player.inventory.open and self.player.inventory.selected_item:
-                            
-                            self.player.inventory.remove_item(self.player.inventory.selected_item.name)
-                                                
-                    if event.key == pygame.K_p:
-                        
-                        self.save_all_data()
-                        
-                        print('save')
-                    
-                    if event.key == pygame.K_b:
-                        
-                        n = randint(8, 25)
-                        
-                        self.bat_pos = self.generate_bats(n)    
-                        
-                    if event.key == pygame.K_f:
-                        
-                        print(self.clock.get_fps())
-                        
+                    self.task_manager.run_binds(event)
+                
                     for i,  k in enumerate(self.player.inventory.slot_binds):
                         
                         if event.key == k:
@@ -893,10 +893,6 @@ class Game:
                             
             # update the screen
             pygame.display.update()
-            
-            if (self.clock.get_fps() > 600 and self.fps_cap != 600):
-                
-                self.fps_cap = 600
             
     def get_dt(self):
         time_now = time()

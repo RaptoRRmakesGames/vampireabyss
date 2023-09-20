@@ -1,0 +1,9 @@
+
+
+utility : 
+
+
+comically large spoon - larger hitboxes 
+sus meter - gives a rought estimate of if a merchant is an imposter 
+Blood Vial - + max hp / sacrifices hp for damage
+Extended Fangs - lifesteal (stackable max 3)
