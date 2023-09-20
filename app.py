@@ -36,14 +36,6 @@ def change_color(img,  new_color):
             if pixel_color.a == 255:
                 new_pixel_color = pygame.Color(new_color[0], new_color[1], new_color[2], pixel_color.a)
                 img.set_at((x, y), new_pixel_color)
-
-def draw_lighted_image(display: pygame.Surface, img : pygame.Surface, pos:tuple[int, int]):
-    
-    display.blit(img,pos,special_flags=BLEND_RGBA_ADD)
-    
-def draw_darkened_image(display, img,pos):
-    
-    display.blit(img,pos,special_flags=BLEND_MULT)
     
 def create_circle_light(color_range=100, circle_multiplier=1, color_extra=(1,1,1)):
     
@@ -58,31 +50,6 @@ def create_circle_light(color_range=100, circle_multiplier=1, color_extra=(1,1,1
     light_surf = pygame.transform.scale(light_surf, (light_surf.get_width()*circle_multiplier,light_surf.get_height()*circle_multiplier))
     
     return light_surf
-
-def create_colorized_radial_gradient(radius, center_color, outer_color, intensity=1):
-    size = (2 * radius, 2 * radius)
-    surface = pygame.Surface(size, pygame.SRCALPHA)
-    center = (radius, radius)
-    pixels = pygame.PixelArray(surface)
-    
-    for y in range(size[1]):
-        for x in range(size[0]):
-            pixel = (x, y)
-            distance = pygame.math.Vector2(pixel).distance_to(center)
-            normalized_distance = max(0, min(distance / radius, 1))
-            interpolated_color = (
-                abs(int(center_color[0] + normalized_distance * (outer_color[0] - center_color[0]))),
-                abs(int(center_color[1] + normalized_distance * (outer_color[1] - center_color[1]))),
-                abs(int(center_color[2] + normalized_distance * (outer_color[2] - center_color[2]))),
-            )
-            alpha = abs(int(center_color[3] + normalized_distance * (outer_color[3] - center_color[3])))
-
-            pixels[x, y] = pygame.Color(*interpolated_color, alpha)
-    
-    del pixels
-    for _ in range(intensity-1):
-        surface.blit(surface.copy(), (0,0), special_flags=pygame.BLEND_ADD)
-    return surface
 
 def outline(img):
     mask = pygame.mask.from_surface(img)
@@ -163,25 +130,8 @@ class Game:
         self.assets = {
 
             'vignette': pygame.transform.scale(pygame.image.load(IMG_PATH+'effects/vignete.png').convert_alpha(), (self.display.get_width() + self.vignette_offset, self.display.get_height()+ self.vignette_offset)),
-            'player_light': light_surfs,
-            'darken' : darkensurf,
-            'chest_glow' : create_circle_light(75, 0.8, (2,2,1)),
-            'new_level_block_glow' : create_circle_light(180, 1, (1.2,1.2,1.2)),
-            
-            'room_light' : create_circle_light(255, 1.5),
-            
-            'powerup_glow' : {
-                
-                SpeedUp: create_circle_light(35, 0.4 * 3, (5,5,1)),
-                StrenghtUp: create_circle_light(35, 0.4* 3, (5,1,1))
-                              
-                              },
-            
-            'mouse_glow' : create_circle_light(100,0.3,(1.1,0,0)),
             
             'mouse_png' : pygame.image.load(IMG_PATH+ 'misc/effects.png').convert_alpha(),
-            
-            'bat_glow' : create_circle_light(60, 0.8, (1.5, 0, 0)),
             
             'main_menu' : load_images_from_folder(IMG_PATH+'main menu/logo', sizeup=3),
             'bat' : load_images_from_folder(IMG_PATH+'main menu/bat',sizeup=3),
@@ -347,13 +297,6 @@ class Game:
         self.time_till_close = pygame.time.get_ticks() + 7500
         self.frames = []
         self.performance_testing = False
-        
-        self.light_width = self.assets['player_light'][self.player.state].get_width()//2 
-        self.light_height = self.assets['player_light'][self.player.state].get_height()//2
-                
-        self.chest_width = self.assets['chest_glow'].get_width()//2 - 40
-        self.chest_height = self.assets['chest_glow'].get_height()//2 - 20
-        
         self.vignete_cord = (-self.vignette_offset//2,-self.vignette_offset//2)
         
         self.do_lighting = True
@@ -373,8 +316,25 @@ class Game:
         self.task_manager.bind(pygame.K_q, self.__remove_inv_item)
         self.task_manager.bind(pygame.K_b, self.__regenerate_bats)
         
+        self.light_eng = Lighting(self)
         
+        self.light_eng.set_dark_amount(self.darken)
         
+        self.light_eng.create_light('player_light',255, 0.4, (1,1,1))
+        self.light_eng.create_light('chest_glow', 75, 0.8, (2,2,1))
+        self.light_eng.create_light('new_level_block_glow', 180, 1, (1.2,1.2,1.2))
+        self.light_eng.create_light('room_light', 255, 1.5)
+        self.light_eng.create_light('mouse_glow', 100,0.3,(1.1,0,0))
+        self.light_eng.create_light('bat_glow', 60, 0.8, (1.5, 0, 0))
+        
+        self.light_eng.create_light_folder('powerup_glow', [SpeedUp, StrenghtUp], [create_circle_light(35, 0.4 * 3, (5,5,1)), create_circle_light(35, 0.4* 3, (5,1,1))])
+        
+        self.light_width = self.light_eng.get_light_surf('player_light').get_width()//2 
+        self.light_height = self.light_eng.get_light_surf('player_light').get_height()//2
+                
+        self.chest_width = self.light_eng.get_light_surf('chest_glow').get_width()//2  -38
+        self.chest_height = self.light_eng.get_light_surf('chest_glow').get_height()//2 - 15
+
     def generate_bats(self, n):
         
         bat_pos = [
@@ -419,10 +379,10 @@ class Game:
         
     def draw_cursor(self):
         
-        draw_lighted_image(self.display, self.assets['mouse_glow'], (
-            self.mouse_pos[0] - self.assets['mouse_glow'].get_width()//2,
-            self.mouse_pos[1] - self.assets['mouse_glow'].get_height()//2,
-                                                                     ))
+        self.light_eng.render_unnat_light(self.display, 'mouse_glow',  (
+            self.mouse_pos[0] - self.light_eng.get_light_surf('mouse_glow').get_width()//2,
+            self.mouse_pos[1] - self.light_eng.get_light_surf('mouse_glow').get_height()//2
+            ),)
                 
         self.display.blit(self.assets['mouse_png'], (
             self.mouse_pos[0], self.mouse_pos[1] - 2
@@ -460,7 +420,8 @@ class Game:
         # for pos in self.bat_pos:
         outline_img = self.cached_outlines[self.bat_anim.get_image()]
         for pos in self.bat_pos:
-            draw_lighted_image(self.display, self.assets['bat_glow'], (pos[0] - 24, pos[1]- 31))
+            self.light_eng.render_unnat_light(self.display, 'bat_glow', (pos[0] - 24, pos[1]- 31))
+            # draw_lighted_image(self.display, self.assets['bat_glow'], (pos[0] - 24, pos[1]- 31))
             # self.display.blit(self.bat_anim.get_image(),(pos))   
             # self.display.blit(outline_img,(pos) )
         
@@ -593,78 +554,40 @@ class Game:
         self.dungeon.move_enemies(self.dt)
         
     def _lighting(self):
-        
-        self.assets['darken'].fill((self.darken, self.darken, self.darken))
+
+        self.light_eng.clear_lights()
         
         if self.state == 'game':
             
             if not self.player.current_room.type == 'fight' or( self.player.curent_hallway and self.player.curent_hallway.rect.colliderect(self.player.rect)):
-                draw_lighted_image(
-                    self.assets['darken'],
-                    self.assets['player_light'][self.player.state],
-                    (
-                
-                    (self.player.render_rect.centerx) - self.light_width,
-                    (self.player.render_rect.centery) - self.light_height 
-            
-            
-                    )
-                )
+
+                self.light_eng.render_nat_light('player_light',((self.player.render_rect.centerx) - self.light_width,(self.player.render_rect.centery) - self.light_height))
 
             else:
-                draw_lighted_image(
-                    self.assets['darken'],
-                    self.assets['room_light'],
-                    (
-                        
-                    (self.player.current_room.rect.centerx - self.scroll[0]) - self.light_width - self.player.current_room.rect.width // 2 + 0,
-                    (self.player.current_room.rect.centery - self.scroll[1]) - self.light_height - self.player.current_room.rect.height // 2 
-                    
-                    
-                    )
-                )
-                
-            
-            
-            self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
+
+                self.light_eng.render_nat_light('room_light', ((self.player.current_room.rect.centerx - self.scroll[0]) - self.light_width - self.player.current_room.rect.width // 2 + 0,(self.player.current_room.rect.centery - self.scroll[1]) - self.light_height - self.player.current_room.rect.height // 2 ))
+
+            self.display.blit(self.light_eng.get_base_surf(), (0,0), special_flags=BLEND_RGB_MULT)
             
             for chest in self.dungeon.chest_manager.chests:
                 if self.display.get_rect().colliderect(chest.render_rect) and not chest.opened:
                 
-                    self.display.blit(self.assets['chest_glow'], (chest.rect.centerx - self.scroll[0] - self.chest_width, chest.rect.centery - self.scroll[1] - self.chest_height,), special_flags=BLEND_RGB_ADD)
+                    self.light_eng.render_unnat_light(self.display, 'chest_glow', (chest.rect.centerx - self.scroll[0] - self.chest_width, chest.rect.centery - self.scroll[1] - self.chest_height,))
                 
             for powerup in self.dungeon.powerup_manager.powerups:
                 
                 if self.display.get_rect().colliderect(powerup.render_rect):
-                    self.display.blit(self.assets['powerup_glow'][type(powerup)], (powerup.rect.centerx - self.scroll[0] - 40, powerup.rect.centery - self.scroll[1] - 40 ,), special_flags=BLEND_RGB_ADD)
-            
+                    self.light_eng.render_unnat_from_folder(self.display, 'powerup_glow', type(powerup), (powerup.rect.centerx - 40, powerup.rect.centery - 40), self.scroll)
+
             if self.state == 'game':
-                self.display.blit(self.assets['new_level_block_glow'], 
-                                
-                                (
-                                    
-                                    (self.dungeon.next_level_block.render_rect.x - 100,
-                                    self.dungeon.next_level_block.render_rect.y - 100,)
-                                
-                                )
-                                
-                                ,special_flags=BLEND_RGB_ADD)
+
+                self.light_eng.render_unnat_light(self.display, 'new_level_block_glow', ((self.dungeon.next_level_block.render_rect.x - 100,self.dungeon.next_level_block.render_rect.y - 100,)))
             
         if self.state == 'start_room':
             
-            draw_lighted_image(
-                    self.assets['darken'],
-                    self.assets['room_light'],
-                    (
-                        
-                    (self.start_room.rect.centerx - self.scroll[0]) - self.light_width - self.start_room.rect.width // 2 + 0,
-                    (self.start_room.rect.centery - self.scroll[1]) - self.light_height - self.start_room.rect.height // 2 
-                    
-                    
-                    )
-                )
+            self.light_eng.render_nat_light('room_light',((self.start_room.rect.centerx - self.scroll[0]) - self.light_width - self.start_room.rect.width // 2 + 0,(self.start_room.rect.centery - self.scroll[1]) - self.light_height - self.start_room.rect.height // 2 ))
             
-            self.display.blit(self.assets['darken'], (0,0), special_flags=BLEND_RGB_MULT)
+            self.display.blit(self.light_eng.get_base_surf(), (0,0), special_flags=BLEND_RGB_MULT)
         
         self.display.blit(self.assets['vignette'], self.vignete_cord )
     
@@ -833,14 +756,11 @@ class Game:
             
             self.bat_pos = self.generate_bats(n)    
         
-    
     def run(self):
         # infinite game loop
         
         run = True
         while run:
-            
-
             
             # cap the framerate
             
@@ -860,6 +780,7 @@ class Game:
             # event handler
 
             for event in pygame.event.get():
+                
                 if event.type == pygame.QUIT:
                     
                     self.save_all_data()
