@@ -35,9 +35,11 @@ class Dungeon:
         self.generate_rooms()
         
         self.enemy_manager.spawn_enemies()
+        
         self.chest_manager.spawn_chests()
         self.next_level_block = NextLevelBlock(self.finish_room)
         
+    
         
     def update_level_block(self, player):
         

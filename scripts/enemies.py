@@ -41,8 +41,6 @@ class ItemDrop:
         
         render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], *self.rect.size)
         
-        # pygame.draw.rect(display, (255,255,255), render_rect)
-        
         display.blit(self.drop.image, render_rect.topleft)
             
         
@@ -56,7 +54,7 @@ class Enemy:
     
     def __init__(self,dungeon ,pos, room):
         self.dungeon = dungeon
-        self.enemy_manager = self.dungeon.enemy_manager
+        self.enemy_manager = dungeon.enemy_manager
         self.room = room
         self.rect = pygame.FRect(*pos, 30,30)
         
@@ -83,6 +81,24 @@ class Enemy:
         
         self.vel = [0,0]
         
+    def get_player(self):
+        
+        self.player = self.dungeon.game.player
+        
+    def cap_velocity(self, max_vel):
+        
+        if self.vel[0] > max_vel :
+            self.vel[0] = max_vel
+            
+        if self.vel[1] > max_vel:
+            self.vel[1] = max_vel
+            
+        if self.vel[0] < -max_vel :
+            self.vel[0] = -max_vel
+            
+        if self.vel[1] < -max_vel:
+            self.vel[1] = -max_vel
+        
     def setForce(self, vel):
         
         self.vel[0] += vel[0] / self.knockback_toughness
@@ -91,10 +107,11 @@ class Enemy:
         
     def update(self, player,dt):
         self.dx,self.dy = 0,0
-        
+        self.cap_velocity(1)
         if not self.dead:
             self.dx += self.vel[0]
             self.dy += self.vel[1]
+            
             
             
             if player.current_room == self.room:
@@ -121,13 +138,16 @@ class Enemy:
             self.dx += self.vel[0]
             self.dy += self.vel[1]
             
+            if self.dungeon.game.player.lifesteal:
+                
+                if self.dungeon.game.player.hp < self.dungeon.game.player.max_hp:
+                    
+                    self.dungeon.game.player.hp += 1
+            
             self.vel = list(pygame.math.Vector2(self.vel).move_towards((0,0), 1))
             
             self.drop.update(player,dt)
-            
 
-
-            
     def keep_in_room(self, player):
         
         room = self.room
@@ -218,6 +238,12 @@ class EnemyManager:
                         pos = grid[1].rect.center[0] + randint(-200,200), grid[1].rect.center[1] + randint(-200,200)
                         
                         self.enemies.add(Enemy(self.dungeon,pos, room))
+                        
+    def give_enemies_player(self):
+        
+        for enemy in self.enemies:
+            enemy.get_player()
+            print('gave plr', enemy.player.lifesteal)
                         
     def render_enemies(self, display, offset):
     

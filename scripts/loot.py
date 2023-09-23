@@ -82,8 +82,9 @@ class PowerUpBase:
         
         self.velocity = pygame.math.Vector2(0,3)
         
-        self.player_powers = self.chest.room.dungeon.game.player.powers
+        self.player_powers = self.chest.room.dungeon.game.player.power_adds
         self.base_player_powers = self.chest.room.dungeon.game.player.base_powers
+        self.refresh_player_powers = self.chest.room.dungeon.game.player.refresh_powers
         self.player = self.chest.room.dungeon.game.player
         
         self.rect = pygame.FRect(self.chest.rect.x + 65, self.chest.rect.y + 30, 15,15)
@@ -120,6 +121,7 @@ class SpeedUp(PowerUpBase):
     def do_effect_and_die(self):
         
         self.player_powers['speed'] += self.base_player_powers['speed'] / 15
+        self.refresh_player_powers()
         
         c = randint(15*coin_multi, 23*coin_multi)
         self.player.coins += c
@@ -135,6 +137,7 @@ class StrenghtUp(PowerUpBase):
     def do_effect_and_die(self):
         
         self.player_powers['damage'] += self.base_player_powers['damage'] / 30
+        self.refresh_player_powers()
         c = randint(15*coin_multi, 23*coin_multi)
         self.player.coins += c
         self.round_player_buffs()

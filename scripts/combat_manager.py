@@ -4,7 +4,7 @@ from random import randint
 
 class Hitbox:
     
-    def __init__(self, rect_values, ori, damage):
+    def __init__(self, rect_values, ori, damage, time_to_be_removed=False):
         
         self.rect = pygame.FRect(*rect_values)
         
@@ -13,6 +13,17 @@ class Hitbox:
         self.damage = damage
         
         self.hit_sprites = []
+        
+        self.die_time = pygame.time.get_ticks() + time_to_be_removed if time_to_be_removed != False else 'stayforever'
+        self.be_removed = False
+        
+    def update(self):
+        if self.die_time != 'stayforever':
+            
+            if pygame.time.get_ticks()> self.die_time:
+                self.be_removed = True
+            
+        
         
     def render(self, display, offset):
         

@@ -106,8 +106,6 @@ class Game:
             
             self.next_save = pygame.time.get_ticks() + ticks
             
-       
-    
     def load_assets(self):
         
         IMG_PATH = 'assets/images/'
@@ -234,11 +232,15 @@ class Game:
         self.minimap = Minimap(self, (self.display.get_width() - 110,10), (150,150))
         self.player = Player(self.start_room.rect.center, 0.1, self.dungeon.middle_room, self)
         
+        
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
         
         self.player.inventory.add_item(item_dict['compass'])
+        self.player.inventory.add_item(item_dict['spoon'])
+        self.player.inventory.add_item(item_dict['vial'])
+        self.player.inventory.add_item(item_dict['fang_extendors'])
         
         self.combat_system = CombatSystem(self)
         

@@ -7,7 +7,22 @@ from scripts.writing import Writing
 from scripts.settings import coin_multi
 from scripts.animations import Animation, Animator
 
-
+def outline(img):
+    mask = pygame.mask.from_surface(img)
+    mask_outline = mask.outline()
+    
+    # Create a new display surface with the same dimensions as the image
+    new_display = pygame.Surface(img.get_size())
+    
+    # Fill the new display with a transparent color
+    new_display.fill((0, 0, 0))
+    new_display.set_colorkey((0, 0, 0))
+    
+    # Draw the outline on the new display
+    for pixel in mask_outline:
+        new_display.set_at(pixel, (255, 255, 255))
+    
+    return new_display
 
 class Item:
     
@@ -30,6 +45,9 @@ class Item:
     
 item_dict = {
     'compass' : Item('util', 'Compass', pygame.image.load('assets/images/icons/compass.png').convert_alpha()),
+    'spoon' : Item('util', 'Comically Big Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha()),
+    'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha()),
+    'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha()),
 }
 
 class Inventory:
@@ -60,7 +78,7 @@ class Inventory:
         self.weapon_surf.fill((150,255,255))
         
         self.util_surf = pygame.Surface((32,32)).convert_alpha()
-        self.util_surf.fill((255,255,150))
+        self.util_surf.fill((150,150,60))
         
         self.test_surf = pygame.Surface((32,32)).convert_alpha()
         self.test_surf.fill((255,255,255))
@@ -188,9 +206,7 @@ class Inventory:
                 self.rect.y = self.max_y
                 
                 self.vel = 0 
-                
-
-                    
+           
     def render(self, display):
         
         if display.get_rect().colliderect(self.rect):
@@ -211,6 +227,8 @@ class Inventory:
                 display.blit(self.item_background_colors[item_list[0].tag], (pos))
 
                 display.blit(item_list[0].image, (pos[0] , pos[1] ))
+                
+                display.blit(outline(item_list[0].image), pos)
                 
                 text = self.writing.write(str(item_count), pygame.Color(255,255,255))
                 
@@ -235,20 +253,48 @@ class Inventory:
                 if not pygame.mouse.get_pressed()[0]:
                     
                     self.clicked = False
-                    
-                
+ 
     def affect_player(self):
         
         # self.player.game.minimap.show_coloured_map = False
         
         self.player.game.minimap.feed_rooms(self.player.game.dungeon.get_room_list())
         self.player.game.minimap.feed_hallways(self.player.game.dungeon.hallways)
-        for item in list(self.items.values()):
-            item = item[0]
-                
+        
+        all_items = list(self.items.values())
+        
+        item_name_list = [item[0].name for item in all_items ]
+        
+        if 'Comically Big Spoon' in item_name_list:
+            
+            self.player.big_spoon_buff = 10
+        else:
+            self.player.big_spoon_buff = 0
+
+        if 'Blood Vial' in item_name_list:
+            
+            self.player.max_hp = 2
+            if self.player.hp > self.player.max_hp:
+                self.player.hp = self.player.max_hp
+            self.player.base_powers['damage'] = 1.7
+            self.player.refresh_powers()
+        else:
+            self.player.max_hp = 3
+            if self.player.hp > self.player.max_hp:
+                self.player.hp = self.player.max_hp
+            self.player.base_powers['damage'] = 1
+            self.player.refresh_powers()
+            
+        if 'Fang Extendors' in item_name_list:
+            self.player.lifesteal = True
+        else:
+            self.player.lifesteal = False
+            
+        
+            
+        
                 
 
-                
 
 class Player:
     
@@ -270,15 +316,18 @@ class Player:
         self.can_attack = True
         self.hitboxes = []
         
+        self.lifesteal = False
+        
         self.current_room = start_room
         self.curent_hallway = None
         
         self.coins = 0
         self.damage = 1
-        self.powers = {'speed': 1, 'damage' : 1,'dash_strength' : 1 }
         self.base_powers = {'speed': 1, 'damage' : 1,'dash_strength' : 1 }
+        self.power_adds = {'speed': 0, 'damage' : 0,'dash_strength' : 0}
+        self.powers = self.base_powers.copy()
         
-        self.hp = 3
+        self.hp = 0
         self.max_hp = 3
         
         self.stop_interval = 50
@@ -292,7 +341,7 @@ class Player:
         self.go_down = range(-135,-45)
         self.go_up = range(45, 135)
         
-        
+        self.big_spoon_buff = 0
         
         self.inventory = Inventory(self)
         
@@ -339,10 +388,10 @@ class Player:
         
         self.image = self.animator.get_image()
         
-        self.dash_strength = 9
+        self.dash_strength = 15
         self.can_dash = True
         self.dash = False
-        self.stop_dash_time = 150
+        self.stop_dash_time = 50
         self.next_stop_dash = pygame.time.get_ticks() + self.stop_dash_time
         
         self.dash_timer = 2000
@@ -358,11 +407,15 @@ class Player:
             self.next_stop_dash = pygame.time.get_ticks() + self.stop_dash_time
             self.can_dash = False
             
-        if self.dash and pygame.time.get_ticks() > self.next_stop_dash:
+        if self.dash:
             
-            self.dash = False
-            self.time_till_next_dash = pygame.time.get_ticks() + self.dash_timer
-            
+            if pygame.time.get_ticks() > self.next_stop_dash:
+                self.dash = False
+                self.time_till_next_dash = pygame.time.get_ticks() + self.dash_timer
+            else:
+                
+                self.hitboxes.append(Hitbox(self.rect, self.ori, 1, 1 ))
+
         if pygame.time.get_ticks() > self.time_till_next_dash and not self.can_dash and not k[pygame.K_LSHIFT]:
             
             self.can_dash = True
@@ -546,7 +599,11 @@ class Player:
         self.ori = 'up' if self.degrees in self.go_up else 'right' if self.degrees in self.go_right else 'left' if self.degrees in self.go_left else 'down' if self.degrees in self.go_down else self.last_ori
         self.last_ori = self.ori
         
-   
+    def refresh_powers(self):
+        
+        self.powers['damage'] = self.base_powers['damage'] + self.power_adds['damage']
+        self.powers['speed'] = self.base_powers['speed'] + self.power_adds['speed']
+        self.powers['dash_strength'] = self.base_powers['dash_strength'] + self.power_adds['dash_strength']
         
     def cap_velocity(self, max_vel):
         
@@ -612,7 +669,7 @@ class Player:
         # Add the normalized velocity change to the current velocity
         self.velocity += velocity_change
 
-        self.cap_velocity(1.5 * self.powers['speed'] * max(1, self.dash * self.dash_strength)) if not self.dash else 0
+        self.cap_velocity(1.5 * self.powers['speed'] * max(1, self.dash * self.dash_strength)) #if not self.dash else 0
 
         self.dx, self.dy = self.velocity.x, self.velocity.y
 
@@ -635,7 +692,6 @@ class Player:
         self.rect.x += self.dx * dt
         self.rect.y += self.dy * dt
 
-        
     def update_combat(self):
         keys = pygame.key.get_pressed()
         
@@ -649,24 +705,29 @@ class Player:
                 self.animator.set_anim('bigpunch_'+self.ori+'_'+now_attack)
                 self.last_attack_turn = now_attack
                 
-                if self.ori == 'up':
-                    top = self.rect.y - 32
-                    left = self.rect.x - 7
-                    width_height = (32 + 14,32)
-                if self.ori == 'down':
-                    top = self.rect.y + self.rect.width 
-                    left = self.rect.x - 7
-                    width_height = (32 + 14,32)
+                match self.ori: 
                     
-                if self.ori == 'left':
-                    top = self.rect.y - 7
-                    left = self.rect.x - 32
-                    width_height = (32,32 + 14)
+                    case 'up':
+                        top = self.rect.y - 32 - 15 - self.big_spoon_buff
+                        left = self.rect.x - 7
+                        width_height = (32 + 14,32 + self.big_spoon_buff)
+                        
+                    case 'down':
+                        top = self.rect.y + self.rect.width #+ self.big_spoon_buff
+                        left = self.rect.x - 7 
+                        width_height = (32 + 14,32 + self.big_spoon_buff)
                     
-                if self.ori == 'right':
-                    top = self.rect.y - 7
-                    left = self.rect.x + self.rect.width 
-                    width_height = (32,32 + 14)
+                        
+                    case 'left':
+                        top = self.rect.y - 7
+                        left = self.rect.x - 32
+                        width_height = (32 + self.big_spoon_buff,32 + 14)
+                        
+                    case 'right':
+                        top = self.rect.y - 7
+                        left = self.rect.x + self.rect.width 
+                        width_height = (32 + self.big_spoon_buff,32 + 14)
+
 
                 self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage'] *1.5))
                 
@@ -683,24 +744,28 @@ class Player:
                 self.animator.set_anim('punch'+'_'+self.ori+'_'+now_attack)
                 self.last_attack_turn = now_attack
                 
-                if self.ori == 'up':
-                    top = self.rect.y - 32
-                    left = self.rect.x - 7
-                    width_height = (32 + 14,32)
-                if self.ori == 'down':
-                    top = self.rect.y + self.rect.width 
-                    left = self.rect.x - 7
-                    width_height = (32 + 14,32)
+                match self.ori: 
                     
-                if self.ori == 'left':
-                    top = self.rect.y - 7
-                    left = self.rect.x - 32
-                    width_height = (32,32 + 14)
-        
-                if self.ori == 'right':
-                    top = self.rect.y - 7
-                    left = self.rect.x + self.rect.width 
-                    width_height = (32,32 + 14)
+                    case 'up':
+                        top = self.rect.y - 32 - self.big_spoon_buff
+                        left = self.rect.x - 10
+                        width_height = (32 + 14,32 + self.big_spoon_buff)
+                        
+                    case 'down':
+                        top = self.rect.y + self.rect.width #+ self.big_spoon_buff
+                        left = self.rect.x - 10
+                        width_height = (32 + 14,32 + self.big_spoon_buff)
+                    
+                        
+                    case 'left':
+                        top = self.rect.y - 10 
+                        left = self.rect.x - 32 - self.big_spoon_buff
+                        width_height = (32 + self.big_spoon_buff,32 + 14)
+                        
+                    case 'right':
+                        top = self.rect.y - 10
+                        left = self.rect.x + self.rect.width 
+                        width_height = (32 + self.big_spoon_buff,32 + 14)
 
                 self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage']))
         
@@ -728,6 +793,16 @@ class Player:
         else:
             
             self.hitboxes = []
+            
+        for hitbox in self.hitboxes:
+            
+            if hitbox.die_time != 'stayforever':
+                
+                hitbox.update()
+                
+                if hitbox.be_removed:
+                    
+                    self.hitboxes.remove(hitbox)
                
     def render(self, display, offset, nocap=True):
         self.render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
@@ -741,9 +816,9 @@ class Player:
             
             # pygame.draw.circle(display, (255,255,255), self.pos + pygame.math.Vector2(400 + 29,300 - 57), 16)
             
-            # for box in self.hitboxes:
+            for box in self.hitboxes:
                 
-            #     box.render(display, offset)
+                box.render(display, offset)
      
     def set_pos(self, pos):
         
