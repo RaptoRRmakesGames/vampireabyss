@@ -1,6 +1,5 @@
 import cProfile 
 from app import Game
-print(dir(cProfile))
 
 game = Game()
 

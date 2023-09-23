@@ -115,18 +115,6 @@ class Game:
         self.vignette_offset = 100
         self.vignete_zoom = 2
 
-        darkensurf = pygame.Surface(self.display.get_size()).convert_alpha()
-        
-        self.darken = 100
-        
-        darkensurf.fill((self.darken, self.darken, self.darken))
-        
-        light_surfs = {'demontime': None, 'regular': None}
-        
-        light_surfs['demontime'] = create_circle_light(100, 1, (2,1,1))
-        light_surfs['regular'] = create_circle_light(255, 0.4, (1,1,1))
-        
-        
         self.assets = {
 
             'vignette': pygame.transform.scale(pygame.image.load(IMG_PATH+'effects/vignete.png').convert_alpha(), (self.display.get_width() + self.vignette_offset, self.display.get_height()+ self.vignette_offset)),
@@ -244,7 +232,7 @@ class Game:
         self.start_room = Start_Room()
         
         self.dungeon = Dungeon(self, *self.room_count, 1)
-        self.minimap = Minimap(self, (self.display.get_width() - 110,10), (100,100))
+        self.minimap = Minimap(self, (self.display.get_width() - 110,10), (150,150))
         self.player = Player(self.start_room.rect.center, 0.1, self.dungeon.middle_room, self)
         
         self.minimap.feed_rooms(self.dungeon.get_room_list())
@@ -318,7 +306,7 @@ class Game:
         
         self.light_eng = Lighting(self)
         
-        self.light_eng.set_dark_amount(self.darken)
+        self.light_eng.set_dark_amount(50)
         
         self.light_eng.create_light('player_light',255, 0.4, (1,1,1))
         self.light_eng.create_light('chest_glow', 75, 0.8, (2,2,1))
@@ -832,5 +820,3 @@ if __name__ == '__main__':
     
     pygame.quit()
 
-
-print('to alaksa teleios')

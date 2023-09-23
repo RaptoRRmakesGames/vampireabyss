@@ -53,68 +53,72 @@ class Dungeon:
     def generate_rooms(self):
 
         set_finish = False
-        
-        choices = ['fight','fight', 'chest', 'empty', 'empty']
-        
-        middle_room = f'{self.width // 2};{self.height // 2}'
-        self.rooms[middle_room][1] = Room(self.rooms[middle_room][0], 'start', self, middle_room, create_room_img())
-        self.middle_room_pos = self.rooms[middle_room][1].rect.center
-        self.middle_room = self.rooms[middle_room][1]
-        
-        for x in range(3):
-        
-            coord_x = int(f'{self.width // 2};{self.height // 2}'.split(';')[0])
-            coord_y = int(f'{self.width // 2};{self.height // 2}'.split(';')[1])
-            
-            for i in range(10): 
-            
-                what = choice(['up', 'down', 'left', 'right'])
-                
-                if what == 'up' and coord_y > 1:
-                    coord_y -= 1
-                    htype = 'v'
-                    
-                if what == 'down' and coord_y < self.height - 2:
-                    coord_y += 1
-                    htype = 'v'
-                if what == 'left' and coord_x > 1:
-                    coord_x -= 1
-                    htype = 'h'
-                if what == 'right' and coord_x < self.width - 2:
-                    coord_x += 1
-                    htype = 'h'
-                    
-                str_cord = f'{coord_x};{coord_y}'
-                
-                if isinstance(self.rooms[str_cord][1], BlankRoom):
-                    if i < 3 or set_finish:
-                        room_choice = choice(choices)
-
-                        self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], room_choice, self,f"{coord_x};{coord_y}", create_room_img())
-                    else:
-                        set_finish = True
-                        self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], 'finish', self,f"{coord_x};{coord_y}", create_room_img())
-                        self.finish_room = self.rooms[str_cord][1]
-                        
-                    newroom = self.rooms[str_cord][1]
-                        
-                    if htype == 'h':
-                        if what=='left':
-                            self.hallways.append(Hallway((newroom.rect.right, newroom.rect.y + ROOM_SIZE//2 - 60),self, htype, what))
-                        if what=='right':
-                            self.hallways.append(Hallway((newroom.rect.left - self.room_distance,newroom.rect.y + ROOM_SIZE//2  -60),self, htype, what))
-                    if htype == 'v':
-                        if what=='up':
-                            self.hallways.append(Hallway((newroom.rect.x + ROOM_SIZE//2 - 60, newroom.rect.bottom),self, htype, what))
-                        if what=='down':
-                            self.hallways.append(Hallway((newroom.rect.x + ROOM_SIZE//2 - 60, newroom.rect.top - self.room_distance),self, htype, what))
-                            
-        room_list = self.get_room_list()
-        
         finish_inside = False
-        for room in room_list:
-            if room.type == 'finish':
-                finish_inside = True
+
+        
+        while not finish_inside:
+            choices = ['fight','fight', 'chest', 'empty', 'empty']
+            
+            middle_room = f'{self.width // 2};{self.height // 2}'
+            self.rooms[middle_room][1] = Room(self.rooms[middle_room][0], 'start', self, middle_room, create_room_img())
+            self.middle_room_pos = self.rooms[middle_room][1].rect.center
+            self.middle_room = self.rooms[middle_room][1]
+            
+            for x in range(3):
+            
+                coord_x = int(f'{self.width // 2};{self.height // 2}'.split(';')[0])
+                coord_y = int(f'{self.width // 2};{self.height // 2}'.split(';')[1])
+                
+                for i in range(10): 
+                
+                    what = choice(['up', 'down', 'left', 'right'])
+                    
+                    if what == 'up' and coord_y > 1:
+                        coord_y -= 1
+                        htype = 'v'
+                        
+                    if what == 'down' and coord_y < self.height - 2:
+                        coord_y += 1
+                        htype = 'v'
+                    if what == 'left' and coord_x > 1:
+                        coord_x -= 1
+                        htype = 'h'
+                    if what == 'right' and coord_x < self.width - 2:
+                        coord_x += 1
+                        htype = 'h'
+                        
+                    str_cord = f'{coord_x};{coord_y}'
+                    
+                    if isinstance(self.rooms[str_cord][1], BlankRoom):
+                        if i < 3 or set_finish:
+                            room_choice = choice(choices)
+
+                            self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], room_choice, self,f"{coord_x};{coord_y}", create_room_img())
+                        else:
+                            set_finish = True
+                            self.rooms[str_cord][1] = Room(self.rooms[str_cord][0], 'finish', self,f"{coord_x};{coord_y}", create_room_img())
+                            self.finish_room = self.rooms[str_cord][1]
+                            
+                        newroom = self.rooms[str_cord][1]
+                            
+                        if htype == 'h':
+                            if what=='left':
+                                self.hallways.append(Hallway((newroom.rect.right, newroom.rect.y + ROOM_SIZE//2 - 60),self, htype, what))
+                            if what=='right':
+                                self.hallways.append(Hallway((newroom.rect.left - self.room_distance,newroom.rect.y + ROOM_SIZE//2  -60),self, htype, what))
+                        if htype == 'v':
+                            if what=='up':
+                                self.hallways.append(Hallway((newroom.rect.x + ROOM_SIZE//2 - 60, newroom.rect.bottom),self, htype, what))
+                            if what=='down':
+                                self.hallways.append(Hallway((newroom.rect.x + ROOM_SIZE//2 - 60, newroom.rect.top - self.room_distance),self, htype, what))
+                                
+            room_list = self.get_room_list()
+            
+            finish_inside = False
+            for room in room_list:
+                if room.type == 'finish':
+                    finish_inside = True 
+                    break
                 
         if not finish_inside:
             self.generate_rooms()

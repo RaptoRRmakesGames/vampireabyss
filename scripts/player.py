@@ -742,9 +742,9 @@ class Player:
             
             # pygame.draw.circle(display, (255,255,255), self.pos + pygame.math.Vector2(400 + 29,300 - 57), 16)
             
-            for box in self.hitboxes:
+            # for box in self.hitboxes:
                 
-                box.render(display, offset)
+            #     box.render(display, offset)
      
     def set_pos(self, pos):
         
