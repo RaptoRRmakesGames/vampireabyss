@@ -18,8 +18,7 @@ class Dungeon:
         self.room_distance = 250
         
         self.level = level
-        
-        print(self.level)
+
         
         self.game = game
         
@@ -140,7 +139,7 @@ class Dungeon:
         sorted_hallways = sorted(hallways, key=lambda x: x[1])
         
         player.curent_hallway = sorted_hallways[0][0] if sorted_hallways[0][1] < 300 else None
-        # print(sorted(hallways, key=lambda x: x[1])[1])
+
            
     def get_room_list(self):
         roomlist = []
@@ -200,8 +199,7 @@ class Dungeon:
                             roo.locked = False
                         # roo.locked = False
                         
-                        
-                    # print(roo.locked)
+
                                          
     def render_enemies(self, display, offset=(0,0)):
         

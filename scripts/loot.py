@@ -57,14 +57,13 @@ class ChestManager:
     def update_chests(self, player):
         
         for chest in self.chests:
-            # print(pygame.math.Vector2(chest.rect.center).distance_to(pygame.math.Vector2(player.rect.center)))
             
             if pygame.math.Vector2(chest.rect.center).distance_to(pygame.math.Vector2(player.rect.center)) < 100:
                 
-                # print('in range')
+
                 if pygame.key.get_pressed()[pygame.K_e] and not chest.opened:
                     
-                    # print('opened')
+     
                     
                     self.dungeon.powerup_manager.spawn_powerup(chest)
 
@@ -124,7 +123,7 @@ class SpeedUp(PowerUpBase):
         
         c = randint(15*coin_multi, 23*coin_multi)
         self.player.coins += c
-        # print(f'gave {c} coins to player', f"Speed: {self.player_powers['speed']}, Damage: {self.player_powers['damage']}")
+
         self.round_player_buffs()
         
 class StrenghtUp(PowerUpBase):
@@ -139,7 +138,7 @@ class StrenghtUp(PowerUpBase):
         c = randint(15*coin_multi, 23*coin_multi)
         self.player.coins += c
         self.round_player_buffs()
-        # print(f'gave {c} coins to player', f"Speed: {self.player_powers['speed']}, Damage: {self.player_powers['damage']}")
+
         
 class PowerupManager:
     
@@ -164,7 +163,7 @@ class PowerupManager:
             if powerup.rect.colliderect(player.rect) and not powerup.just_spawned:
                 
                 powerup.do_effect_and_die()
-                # print(powerup.player_powers)
+
                 self.powerups.remove(powerup)
             
     def render_powerups(self, display, offset):

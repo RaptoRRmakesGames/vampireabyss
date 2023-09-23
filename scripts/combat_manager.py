@@ -40,25 +40,23 @@ class CombatSystem:
                     match hitbox.ori :
                         case 'up':
                             vel = (knock_back_sideoff, -knock_back_strenght)
-                            
-                            # print('eh')
+
                             
                         case 'down':
                             vel = (knock_back_sideoff, knock_back_strenght)
-                            # print('eh')
+
                             
                         case 'left':
                             vel = (-knock_back_strenght,knock_back_sideoff)
-                            # print('eh')
+
                             
                         case 'right':
                             vel = (knock_back_strenght,knock_back_sideoff)
-                            # print('eh')
+
                             
                     enemy.setForce(vel)
                             
                     hitbox.hit_sprites.append(enemy)
-                    # print('hit')
-            
+
             
         

@@ -58,7 +58,7 @@ class Button:
         display.blit(self.writing.write(self.text, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))
         
     def click_execute_fun(self, *args):
-                # print('update')
+
         
         mouse_x, mouse_y = self.game.mouse_pos
         mouse_col = self.rect.collidepoint(mouse_x, mouse_y)
@@ -67,7 +67,7 @@ class Button:
     
             if pygame.mouse.get_pressed()[0] and not self.clicked:
                 
-                # print('clicked')
+
                 
                 self.clicked = True
                 

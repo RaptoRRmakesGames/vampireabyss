@@ -91,7 +91,6 @@ class Game:
         
         
                 self.fps_cap_choice = int(loadvar('user_settings.wlr'))
-                print(self.fps_cap_choice)
             except FileNotFoundError:
                 
                 self.fps_cap_choice = 0
@@ -107,7 +106,7 @@ class Game:
             
             self.next_save = pygame.time.get_ticks() + ticks
             
-            # print('quick save')
+       
     
     def load_assets(self):
         
@@ -469,7 +468,7 @@ class Game:
                             self.player.dy = 0
                         
     def update_ui(self):
-        #print(round(self.clock.get_fps()))
+
         if self.show_fps:
             self.display.blit(self.writings['fps'].write(str(round(self.clock.get_fps()))+ 'fps', pygame.Color(255,255,255)) , (self.ui_cords['right'] - 45, self.ui_cords['bottom']-8))
         

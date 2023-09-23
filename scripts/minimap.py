@@ -8,8 +8,7 @@ class Minimap:
         game_display = self.game.display
         
         self.diffrence = game_display.get_width() / size[0] * (self.game.room_count[0] * 1.5)
-        
-        print('hah' , self.diffrence)
+
         
         self.background = pygame.Surface(size).convert_alpha()
         

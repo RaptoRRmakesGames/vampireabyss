@@ -114,7 +114,7 @@ class Inventory:
                 
                 if item.name == 'maxhealth':
                     
-                    print('max health')
+
                     
                     self.player.max_hp += 1
                     
@@ -124,7 +124,6 @@ class Inventory:
                 
                 if item.name == 'health':
                     
-                    print('health')
                     
                     if self.player.hp < self.player.max_hp:
                         self.player.hp += 1
@@ -248,7 +247,7 @@ class Inventory:
             item = item[0]
                 
                 
-            print(item)
+
                 
 
 class Player:
@@ -547,7 +546,7 @@ class Player:
         self.ori = 'up' if self.degrees in self.go_up else 'right' if self.degrees in self.go_right else 'left' if self.degrees in self.go_left else 'down' if self.degrees in self.go_down else self.last_ori
         self.last_ori = self.ori
         
-        # print(self.degrees)
+   
         
     def cap_velocity(self, max_vel):
         
@@ -635,7 +634,7 @@ class Player:
         # self.normalise_speed()
         self.rect.x += self.dx * dt
         self.rect.y += self.dy * dt
-        # print(round(self.dx * dt), round(self.dy * dt))
+
         
     def update_combat(self):
         keys = pygame.key.get_pressed()

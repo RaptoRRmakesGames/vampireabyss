@@ -141,8 +141,7 @@ class Enemy:
                 self.rect.top = room.top_rect.bottom
                 
                 self.dy = 0
-                
-                # print('enemy collision')
+
 
                 
             if room.bottom_rect.colliderect(pygame.Rect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height)):
@@ -150,7 +149,6 @@ class Enemy:
                 self.rect.bottom = room.bottom_rect.top
                 
                 self.dy = 0
-                # print('enemy collision')
 
                 
             if room.left_rect.colliderect(pygame.Rect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height)):
@@ -158,7 +156,7 @@ class Enemy:
                 self.rect.left = room.left_rect.right
                 
                 self.dy = 0
-                # print('enemy collision')
+
 
                 
             if room.right_rect.colliderect(pygame.Rect(self.rect.x + self.dx, self.rect.y , self.rect.width, self.rect.height)):
@@ -166,7 +164,7 @@ class Enemy:
                 self.rect.right = room.right_rect.left
                 
                 self.dy = 0
-                # print('enemy collision')
+
             
     def move(self, dt):
         
@@ -175,13 +173,13 @@ class Enemy:
             self.rect.y += self.dy * dt
         except AttributeError:
             pass
-        # print(self.vel)
+
         
         
         
     def render(self, display , offset, on_camera):
         render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
-        # print(self.room.has_player)
+
         if self.room.locked and on_camera:
             
             # if render_rect.colliderect(display.get_rect()):

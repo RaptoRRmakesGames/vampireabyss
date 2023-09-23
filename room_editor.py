@@ -117,8 +117,7 @@ while run:
                 
                 # surf.blit(selected_img, (current_x * 16 - 16*5 - scroll[0], current_y * 16 - 16 * 5- scroll[1]))
                 surf.blit(selected_img, (((current_x -5) *16, (current_y -5) *16)))
-                print('hah')
-                
+
                 
     keys()
     render()
