@@ -718,7 +718,6 @@ class Game:
     def __refresh_room(self):
         
         if self.state == 'game':
-                            
             self.dungeon = self.dungeon.copy()
             self.minimap.feed_rooms(self.dungeon.get_room_list())
             self.minimap.feed_hallways(self.dungeon.hallways)
@@ -799,8 +798,12 @@ class Game:
                         
                         if event.key == k:
                             
-                            self.player.inventory.selected_item = list(self.player.inventory.items.values())[i][0] if self.player.inventory.selected_item != list(self.player.inventory.items.values())[i][0] else None
+                            try:
                             
+                                self.player.inventory.selected_item = list(self.player.inventory.items.values())[i][0] if self.player.inventory.selected_item != list(self.player.inventory.items.values())[i][0] else None
+                            except IndexError:
+                                
+                                pass
             # update the screen
             pygame.display.update()
             

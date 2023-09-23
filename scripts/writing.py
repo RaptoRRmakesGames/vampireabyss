@@ -37,13 +37,15 @@ class Writing:
             
     def cache_text(self, text, color, surface):
         
-        if (color.r, color.g, color.b) in self.cached_texts.keys():
+        pass
+        
+        # if (color.r, color.g, color.b) in self.cached_texts.keys():
             
-            self.cached_texts[(color.r, color.g, color.b)][text] = surface
-        else:
+        #     self.cached_texts[(color.r, color.g, color.b)][text] = surface
+        # else:
             
-            self.cached_texts[(color.r, color.g, color.b)] = {}
-            self.cached_texts[(color.r, color.g, color.b)][text] = surface
+        #     self.cached_texts[(color.r, color.g, color.b)] = {}
+        #     self.cached_texts[(color.r, color.g, color.b)][text] = surface
             
     def change_color(self, img, color):
         for x in range(img.get_width()):
@@ -51,7 +53,7 @@ class Writing:
                 color.a = img.get_at((x, y)).a
                 img.set_at((x, y), color)
 
-    def write(self, text, color=pygame.Color(0, 0, 0)):
+    def write(self, text, color=pygame.Color(0, 0, 0), cache=True):
         
         write_surface = pygame.Surface((len(text) * self.size, self.size), pygame.SRCALPHA)
         
