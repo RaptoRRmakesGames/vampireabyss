@@ -26,12 +26,13 @@ def outline(img):
 
 class Item:
     
-    def __init__(self, tag, name, img: pygame.Surface, stack_size=-1):
+    def __init__(self, tag, name, img: pygame.Surface, stack_size=-1, desc = ''):
         
         self.tag = tag 
         self.name = name 
         self.image = img
         self.rect = pygame.Rect(0,0, 36,36)
+        self.desc = desc
         
         self.stack_size = stack_size
         
@@ -44,10 +45,10 @@ class Item:
         return '{}, {}'.format(self.tag, self.name)
     
 item_dict = {
-    'compass' : Item('util', 'Compass', pygame.image.load('assets/images/icons/compass.png').convert_alpha()),
-    'spoon' : Item('util', 'Comically Big Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha()),
-    'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha()),
-    'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha()),
+    'compass' : Item('util', 'Compass', pygame.image.load('assets/images/icons/compass.png').convert_alpha(), desc='Colours your Minimap lnbrTo show you the Way'),
+    'spoon' : Item('util', 'Comically Big Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha(), desc='Increases your Hit Range lnbr'),
+    'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha(), desc='Vastly Increases Damage lnbrBut lowers your endurance'),
+    'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrin order to heal yourself'),
 }
 
 class Inventory:
@@ -121,8 +122,7 @@ class Inventory:
         
         self.items[itemname].pop(0)
         self.affect_player()
-            
-        
+
     def add_item(self, item):
         
         if len(self.items.keys()) < 10 or item.name in self.get_tag_list():
@@ -207,7 +207,7 @@ class Inventory:
                 
                 self.vel = 0 
            
-    def render(self, display):
+    def render(self, display, mouse_pos):
         
         if display.get_rect().colliderect(self.rect):
             
@@ -236,11 +236,28 @@ class Inventory:
                 
                 display.blit(text, text_rect.topleft) if item_count > 1 else 0
                 
+                    
+                # pygame.draw.circle(display, (255,255,255), mouse_pos, 20)
+                
                 if self.selected_item and item_list[0].name == self.selected_item.name:
                     
                     pygame.draw.circle(display, (255,255,255), (pos[0] + 15, pos[1] + 15), 20, 5)
                     
                 col_rect = pygame.Rect(*pos, item_list[0].image.get_rect().width, item_list[0].image.get_rect().height)
+                if col_rect.collidepoint(mouse_pos):
+                    
+                    text_list = item_list[0].desc.split('lnbr')
+                    
+                    texts = [txt for txt in [self.writing.write(line, pygame.Color((255,255,255))) for line in text_list]]
+                    texts_width = [txt.get_width() for txt in texts]
+                    
+                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 75, max(*texts_width), 50))
+                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 25, 8, 25))
+                    
+                    
+                    for x, line in enumerate(text_list):
+                        
+                        display.blit(self.writing.write(line, pygame.Color((255,255,255))), (pos[0] + 5, pos[1] - 70 + (20 * x)))
                 
                 if col_rect.collidepoint(pygame.mouse.get_pos()):
                     
@@ -255,8 +272,6 @@ class Inventory:
                     self.clicked = False
  
     def affect_player(self):
-        
-        # self.player.game.minimap.show_coloured_map = False
         
         self.player.game.minimap.feed_rooms(self.player.game.dungeon.get_room_list())
         self.player.game.minimap.feed_hallways(self.player.game.dungeon.hallways)
@@ -289,12 +304,6 @@ class Inventory:
             self.player.lifesteal = True
         else:
             self.player.lifesteal = False
-            
-        
-            
-        
-                
-
 
 class Player:
     

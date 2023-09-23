@@ -483,7 +483,7 @@ class Game:
 
   
         # if self.player.inventory.open:
-        self.player.inventory.render(self.display)
+        self.player.inventory.render(self.display, self.mouse_pos)
         
         
         if self.state == 'game':
@@ -566,8 +566,11 @@ class Game:
             for powerup in self.dungeon.powerup_manager.powerups:
                 
                 if self.display.get_rect().colliderect(powerup.render_rect):
-                    self.light_eng.render_unnat_from_folder(self.display, 'powerup_glow', type(powerup), (powerup.rect.centerx - 40, powerup.rect.centery - 40), self.scroll)
-
+                    try:
+                        self.light_eng.render_unnat_from_folder(self.display, 'powerup_glow', type(powerup), (powerup.rect.centerx - 40, powerup.rect.centery - 40), self.scroll)
+                    except KeyError:
+                        self.light_eng.render_unnat_from_folder(self.display, 'powerup_glow', SpeedUp, (powerup.rect.centerx - 40, powerup.rect.centery - 40), self.scroll)
+                    
             if self.state == 'game':
 
                 self.light_eng.render_unnat_light(self.display, 'new_level_block_glow', ((self.dungeon.next_level_block.render_rect.x - 100,self.dungeon.next_level_block.render_rect.y - 100,)))
@@ -661,7 +664,7 @@ class Game:
             
             
             
-            self.player.inventory.render(self.display)
+            self.player.inventory.render(self.display, self.mouse_pos)
             
             self.update_ui()
             

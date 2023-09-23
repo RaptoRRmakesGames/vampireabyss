@@ -4,9 +4,9 @@ from random import *
 from scripts.room import Room
 from scripts.settings import *
 from scripts.writing import Writing
+from scripts.player import item_dict
 
-
-powerups = ['sped', 'autism', 'std']
+powerups = ['idk what this does']
 class Chest:
     
     def __init__(self, room):
@@ -24,7 +24,7 @@ class Chest:
         
         pygame.draw.rect(display, (255,255,0), self.render_rect)
         pygame.draw.rect(display, (139,69,19), self.render_rect, 3)
-        
+
 class ChestManager:
     
     def __init__(self, dungeon):
@@ -68,8 +68,7 @@ class ChestManager:
                     self.dungeon.powerup_manager.spawn_powerup(chest)
 
                     chest.opened = True
-                
-            
+
 class PowerUpBase:
     
     def __init__(self, color, chest):
@@ -141,8 +140,44 @@ class StrenghtUp(PowerUpBase):
         c = randint(15*coin_multi, 23*coin_multi)
         self.player.coins += c
         self.round_player_buffs()
-
         
+class Compass(PowerUpBase):
+    
+    def __init__(self,   chest):
+        super().__init__((255,0,0),  chest)
+        self.explanation = 'Strenght Buff: Increases the players strength by 15% (stacks)'
+        
+    def do_effect_and_die(self):
+        
+        self.player.inventory.add_item(item_dict['compass'])
+class Spoon(PowerUpBase):
+    
+    def __init__(self,   chest):
+        super().__init__((255,0,0),  chest)
+        self.explanation = 'Strenght Buff: Increases the players strength by 15% (stacks)'
+        
+    def do_effect_and_die(self):
+        
+        self.player.inventory.add_item(item_dict['spoon'])
+
+class Vial(PowerUpBase):
+    
+    def __init__(self,   chest):
+        super().__init__((255,0,0),  chest)
+        self.explanation = 'Strenght Buff: Increases the players strength by 15% (stacks)'
+        
+    def do_effect_and_die(self):
+        
+        self.player.inventory.add_item(item_dict['vial'])
+class Fangs(PowerUpBase):
+    
+    def __init__(self,   chest):
+        super().__init__((255,0,0),  chest)
+        self.explanation = 'Strenght Buff: Increases the players strength by 15% (stacks)'
+        
+    def do_effect_and_die(self):
+        
+        self.player.inventory.add_item(item_dict['fang_extendors'])
 class PowerupManager:
     
     def __init__(self, dungeon):
@@ -150,7 +185,7 @@ class PowerupManager:
         self.dungeon = dungeon
         
         
-        self.powerup_types = {"speedup":SpeedUp, 'damage':StrenghtUp}
+        self.powerup_types = {"speedup":SpeedUp, 'damage':StrenghtUp, 'compass' : Compass, 'spoon' : Spoon, 'vial' : Vial, 'fangs': Fangs}
         self.powerups = []
         
     def spawn_powerup(self, chest):
@@ -174,8 +209,7 @@ class PowerupManager:
         for powerup in self.powerups:
             
             powerup.render(display, offset)
-        
-        
+
 class NextLevelBlock:
         
     def __init__(self, room):

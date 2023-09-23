@@ -68,11 +68,10 @@ class Enemy:
         red_img.fill((255,0,0))
         
         pwr_drop = ItemDrop(Item('powerup', 'health',red_img ), (self.rect.center))
-        compass_drop = ItemDrop(item_dict['compass'], self.rect.center)
         
-        drop = choice([pwr_drop, compass_drop])
+        drop = choice([pwr_drop])
         
-        self.drop = drop#ItemDrop(choice([Item('powerup', choice(['health','health','health','health', 'maxhealth']),item_dict['compass'] ])), img, self.rect.center)
+        self.drop = drop
         
         self.attacking = False
         self.dead = False
