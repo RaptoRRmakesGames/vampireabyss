@@ -17,6 +17,7 @@ from scripts.utils import load_images_from_folder, TaskManager
 from scripts.animations import Animation
 from scripts.start_room import Start_Room
 from scripts.lighting import Lighting
+from scripts.font_inits import *
 
 # thats all there is 
 
@@ -28,6 +29,10 @@ pygame.display.init()
 pygame.mouse.set_visible(False)
 pygame.display.set_caption("Vampire's Abyss")
 pygame.display.set_icon(pygame.image.load('assets/logo/logo.png'))
+
+
+# small_font = pygame.font.Font('assets/fonts/ttfs/pixuf.ttf', 16)
+# small_font = pygame.font.Font('assets/fonts/ttfs/pixuf.ttf', 32)
 
 def change_color(img,  new_color):
     for x in range(img.get_width()):
@@ -216,15 +221,15 @@ class Game:
             (0,0,255),
         ]
         
-        self.writings = {
-            'fps' : Writing(8), 
-            'coins' : Writing(12),
-            'buffs' : Writing(8),
-            'timer': Writing(24),
-            'settings' : Writing(18),
-        }
+        # self.writings = {
+        #     'fps' : Writing(8), 
+        #     'coins' : Writing(12),
+        #     'buffs' : Writing(8),
+        #     'timer': Writing(24),
+        #     'settings' : Writing(18),
+        # }
         
-        self.cache_common_colors()
+        # self.cache_common_colors()
         
         self.start_room = Start_Room()
         
@@ -362,10 +367,11 @@ class Game:
         
         self.state = 'menu'
         
-    def draw_text(self, writing:Writing, text:str, pos:(0,0), color=(255,255,255)):
+    def draw_text(self, writing, text:str, pos:(0,0), color=(255,255,255)):
         
-        self.display.blit(writing.write(str(text), pygame.Color(color)), pos)
-        
+        #self.display.blit(writing.write(str(text), pygame.Color(color)), pos)
+        self.display.blit(writing.render(text, False, color), pos)
+
     def draw_cursor(self):
         
         self.light_eng.render_unnat_light(self.display, 'mouse_glow',  (
@@ -400,7 +406,9 @@ class Game:
         self.fps_cap = int(self.fps_choices.get_choice())
         
     def main_menu(self):
-        self.display.blit(self.writings['fps'].write(str(round(self.clock.get_fps()))+ 'fps', pygame.Color(255,255,255)) , (self.ui_cords['right'] - 45, self.ui_cords['bottom']-8))
+        # self.display.blit(self.writings['fps'].write(str(round(self.clock.get_fps()))+ 'fps', pygame.Color(255,255,255)) , (self.ui_cords['right'] - 45, self.ui_cords['bottom']-8))
+        self.draw_text(med_font, str(round(self.clock.get_fps()))+ 'fps', (self.ui_cords['right'] - 55, self.ui_cords['bottom']-15), (255,255,255))
+        
         
         self.main_menu_anim.update()
         self.bat_anim.update()
@@ -472,14 +480,14 @@ class Game:
     def update_ui(self):
 
         if self.show_fps:
-            self.display.blit(self.writings['fps'].write(str(round(self.clock.get_fps()))+ 'fps', pygame.Color(255,255,255)) , (self.ui_cords['right'] - 45, self.ui_cords['bottom']-8))
-        
-        self.display.blit(self.writings['coins'].write('coins: '+str(self.player.coins), pygame.Color(255,255,0)), (5, 5))
+            self.draw_text(med_font, str(round(self.clock.get_fps()))+ 'fps', (self.ui_cords['right'] - 55, self.ui_cords['bottom']-15), (255,255,255))
+
+        self.draw_text(med_more_font, 'coins: '+str(self.player.coins), (5,5), pygame.Color(255,255,0))
         if self.state == 'game':
-            self.display.blit(self.writings['coins'].write('health: '+str(self.player.hp), pygame.Color(0,250,250)), (5, 20))
-        self.display.blit(self.writings['buffs'].write('speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', pygame.Color(0,250,250)), (5, 43))
-        self.display.blit(self.writings['buffs'].write('damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', pygame.Color(0,250,250)), (5, 54))
-  
+            self.draw_text(med_more_font, 'health: '+str(self.player.hp), (5,20), pygame.Color(0,250,250))
+
+        self.draw_text(med_font, 'speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', (5,43), pygame.Color(0,250,250))
+        self.draw_text(med_font, 'damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', (5,60), pygame.Color(0,250,250))
 
   
         # if self.player.inventory.open:
@@ -488,10 +496,11 @@ class Game:
         
         if self.state == 'game':
             ttime = str(round(time()-self.time_from_start,1))
-            time_surf = self.writings['timer'].write(f"{ttime.split('.')[0]}.{ttime.split('.')[1]}", pygame.Color(255,255,255))
-            time_rect = time_surf.get_rect(center = (self.display.get_width()//2, 20))
+            img = large_font.render(f"{ttime.split('.')[0]}.{ttime.split('.')[1]}", False, (255,255,255))
+            time_rect = img.get_rect(center = (self.display.get_width()//2, 20))
             
-            self.display.blit(time_surf, (time_rect.x, time_rect.y))
+            self.display.blit(img, (time_rect.x, time_rect.y))
+            
             self.minimap.render(self.display, self.player)
     
     def _render_sprites(self):
