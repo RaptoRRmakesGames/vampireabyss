@@ -6,7 +6,8 @@ from scripts.settings import *
 from scripts.enemies import EnemyManager
 from scripts.loot import Chest, ChestManager, PowerupManager
 from scripts.loot import NextLevelBlock
-from scripts.writing import room_writing
+# from scripts.writing import room_writing
+from scripts.font_inits import *
 from scripts.utils import create_room_img
 
 from time import time

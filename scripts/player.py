@@ -3,9 +3,10 @@ import pygame
 from random import randint, choice
 
 from scripts.combat_manager import Hitbox
-from scripts.writing import Writing
+# from scripts.writing import Writing
 from scripts.settings import coin_multi
 from scripts.animations import Animation, Animator
+from scripts.font_inits import *
 
 def outline(img):
     mask = pygame.mask.from_surface(img)
@@ -71,7 +72,7 @@ class Inventory:
         
         self.vel = 0
         
-        self.writing = Writing(10)
+        self.writing = med_font#Writing(10)
         
         self.selected_item=  None
         
@@ -230,7 +231,7 @@ class Inventory:
                 
                 display.blit(outline(item_list[0].image), pos)
                 
-                text = self.writing.write(str(item_count), pygame.Color(255,255,255))
+                text = self.writing.render(str(item_count), False, (255,255,255)) #(str(item_count), pygame.Color(255,255,255))
                 
                 text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
                 
@@ -248,7 +249,7 @@ class Inventory:
                     
                     text_list = item_list[0].desc.split('lnbr')
                     
-                    texts = [txt for txt in [self.writing.write(line, pygame.Color((255,255,255))) for line in text_list]]
+                    texts = [txt for txt in [self.writing.render(line,False, pygame.Color((255,255,255))) for line in text_list]]
                     texts_width = [txt.get_width() for txt in texts]
                     
                     pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 75, max(*texts_width), 50))
@@ -257,7 +258,7 @@ class Inventory:
                     
                     for x, line in enumerate(text_list):
                         
-                        display.blit(self.writing.write(line, pygame.Color((255,255,255))), (pos[0] + 5, pos[1] - 70 + (20 * x)))
+                        display.blit(self.writing.render(line,False,  pygame.Color((255,255,255))), (pos[0] + 5, pos[1] - 70 + (20 * x)))
                 
                 if col_rect.collidepoint(pygame.mouse.get_pos()):
                     

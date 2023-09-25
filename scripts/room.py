@@ -3,7 +3,7 @@ import pygame
 pygame.display.set_mode((1280, 920))
 
 from scripts.settings import *
-from scripts.writing import room_writing
+# from scripts.writing import room_writing
 
 class Hallway:
     

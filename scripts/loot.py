@@ -3,8 +3,9 @@ from random import *
 
 from scripts.room import Room
 from scripts.settings import *
-from scripts.writing import Writing
+# from scripts.writing import Writing
 from scripts.player import item_dict
+from scripts.font_inits import *
 
 powerups = ['idk what this does']
 class Chest:
@@ -220,7 +221,7 @@ class NextLevelBlock:
         self.render_rect = pygame.Rect(0,0,0,0)
         
         
-        self.writing = Writing(32)
+        self.writing = huge_font#Writing(32)
         
     def render(self, display, offset=(0,0)):
         
@@ -228,6 +229,6 @@ class NextLevelBlock:
         
         pygame.draw.rect(display, (255,255,255), self.render_rect)
         
-        display.blit(self.writing.write('next', pygame.Color(0,0,0)), (self.render_rect.centerx - self.width//2 + 12, self.render_rect.centery - self.height//2 + 35))
-        display.blit(self.writing.write('level', pygame.Color(0,0,0)), (self.render_rect.centerx - self.width//2 + 12, self.render_rect.centery - self.height//2 + 96))
+        display.blit(self.writing.render('Next', False, (0,0,0)), (self.render_rect.centerx - self.width//2 + 6, self.render_rect.centery - self.height//2 + 23))
+        display.blit(self.writing.render('Level', False, (0,0,0)), (self.render_rect.centerx - self.width//2 + 6, self.render_rect.centery - self.height//2 + 78))
         

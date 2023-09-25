@@ -9,7 +9,6 @@ from scripts.dungeon_generator import Dungeon
 from scripts.minimap import Minimap
 from scripts.player import Player, item_dict
 from scripts.combat_manager import CombatSystem
-from scripts.writing import Writing
 from scripts.filehandling import loadvar, savevar
 from scripts.main_menu_helper import Button, MultiSelect
 from scripts.loot import SpeedUp, StrenghtUp
@@ -220,16 +219,7 @@ class Game:
             (0,255,0),
             (0,0,255),
         ]
-        
-        # self.writings = {
-        #     'fps' : Writing(8), 
-        #     'coins' : Writing(12),
-        #     'buffs' : Writing(8),
-        #     'timer': Writing(24),
-        #     'settings' : Writing(18),
-        # }
-        
-        # self.cache_common_colors()
+
         
         self.start_room = Start_Room()
         
@@ -396,7 +386,7 @@ class Game:
     def settings(self):
         self.fps_choices.update()
         
-        self.draw_text(self.writings['settings'], 'fps limit:', (50, 50))
+        self.draw_text(med_font, 'fps limit:', (50, 50))
         self.fps_choices.render(self.display, (0,0))
         
         self.main_menu_button.update()
@@ -435,18 +425,6 @@ class Game:
             button.update()
             button.animate(self.dt)
             button.render(self.display)
-        
-    def cache_common_colors(self):
-        
-        writing_key_list = list(self.writings.keys())
-        
-        for key in writing_key_list:
-            
-            writing = self.writings[key]
-            
-            for color in self.cached_colors:
-                
-                writing.cache_full_color(pygame.Color(*color))
 
     def keep_player_in_rooms(self):
         
@@ -482,18 +460,15 @@ class Game:
         if self.show_fps:
             self.draw_text(med_font, str(round(self.clock.get_fps()))+ 'fps', (self.ui_cords['right'] - 55, self.ui_cords['bottom']-15), (255,255,255))
 
-        self.draw_text(med_more_font, 'coins: '+str(self.player.coins), (5,5), pygame.Color(255,255,0))
+        self.draw_text(med_more_font, 'Coins: '+str(self.player.coins), (5,5), pygame.Color(255,255,0))
         if self.state == 'game':
-            self.draw_text(med_more_font, 'health: '+str(self.player.hp), (5,20), pygame.Color(0,250,250))
+            self.draw_text(med_more_font, 'Health: '+str(self.player.hp), (5,28), pygame.Color(0,250,250))
 
-        self.draw_text(med_font, 'speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', (5,43), pygame.Color(0,250,250))
-        self.draw_text(med_font, 'damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', (5,60), pygame.Color(0,250,250))
+        self.draw_text(med_font, 'Speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', (5,50), pygame.Color(0,250,250))
+        self.draw_text(med_font, 'Damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', (5,68), pygame.Color(0,250,250))
 
-  
-        # if self.player.inventory.open:
         self.player.inventory.render(self.display, self.mouse_pos)
-        
-        
+
         if self.state == 'game':
             ttime = str(round(time()-self.time_from_start,1))
             img = large_font.render(f"{ttime.split('.')[0]}.{ttime.split('.')[1]}", False, (255,255,255))

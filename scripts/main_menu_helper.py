@@ -1,8 +1,8 @@
 import pygame
 
-from scripts.writing import Writing
+# from scripts.writing import Writing
 from scripts.settings import *
-
+from scripts.font_inits import *
 
 class Button:
     
@@ -17,7 +17,7 @@ class Button:
         
         self.game = game
         
-        self.writing = Writing(textsize)
+        self.font = pygame.font.Font('assets/fonts/ttfs/pixuf.ttf', 16)
         
         self.width, self.height = self.rect.width, self.rect.height
         
@@ -54,8 +54,8 @@ class Button:
         
         
         pygame.draw.rect(display, self.color,pygame.Rect(self.rect.x - offset[0], self.rect.y - offset[1], self.width, self.height))
-        
-        display.blit(self.writing.write(self.text, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))
+        display.blit(self.font.render(self.text, False, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))
+        # display.blit(self.writing.write(self.text, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))
         
     def click_execute_fun(self, *args):
 
@@ -149,7 +149,7 @@ class MultiSelect:
         self.selected = selected_choice
         self.next_button = Button(self.game, (topleft[0] + 150,topleft[1]), self.next, 'next', text_color=(255,255,255), custom_text_offset=(-20,0))
         self.prev_button = Button(self.game, (topleft[0],topleft[1]), self.prev, 'previous', text_color=(255,255,255), custom_text_offset=(-40,0))
-        self.writing = Writing(writing_size)
+        self.font = med_more_font
         
         self.pos = topleft
         
@@ -160,7 +160,7 @@ class MultiSelect:
         
     def render(self, display:pygame.Surface, offset=(0,0), text_color=(255,255,255)):
         
-        text_surf = self.writing.write(self.get_choice(), pygame.Color(text_color))
+        text_surf = self.font.render(self.get_choice(), False, text_color)#self.writing.write(self.get_choice(), pygame.Color(text_color))
         
         display.blit(text_surf, (self.pos[0] + 110, self.pos[1] + 10))
         self.next_button.render(display,offset)
