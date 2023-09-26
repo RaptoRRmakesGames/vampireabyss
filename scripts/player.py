@@ -35,6 +35,18 @@ class Item:
         self.rect = pygame.Rect(0,0, 36,36)
         self.desc = desc
         
+        imgs = [med_font.render(line, False, (255,255,255)).convert_alpha() for line in desc.split('lnbr')]
+        largest_width = sorted(imgs, key= lambda x : x.get_width())[0].get_width()
+        
+        self.text_surf = pygame.Surface(
+            (largest_width + 10, 16 * len(imgs) )
+            ).convert_alpha()
+        
+        for i, img in enumerate(imgs):
+            self.text_surf.blit(img, (0, i * 16))
+
+        self.text_surf.set_colorkey((0,0,0))
+
         self.stack_size = stack_size
         
     def list(self):
@@ -49,7 +61,7 @@ item_dict = {
     'compass' : Item('util', 'Compass', pygame.image.load('assets/images/icons/compass.png').convert_alpha(), desc='Colours your Minimap lnbrTo show you the Way'),
     'spoon' : Item('util', 'Comically Big Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha(), desc='Increases your Hit Range lnbr'),
     'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha(), desc='Vastly Increases Damage lnbrBut lowers your endurance'),
-    'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrin order to heal yourself'),
+    'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrIn order to heal yourself'),
 }
 
 class Inventory:
@@ -222,7 +234,6 @@ class Inventory:
                 
                 item_count = item_list[1]
                 
-                
                 pos = [self.item_positions[x][0] , self.item_positions[x][1]  -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
 
                 display.blit(self.item_background_colors[item_list[0].tag], (pos))
@@ -231,14 +242,11 @@ class Inventory:
                 
                 display.blit(outline(item_list[0].image), pos)
                 
-                text = self.writing.render(str(item_count), False, (255,255,255)) #(str(item_count), pygame.Color(255,255,255))
+                text = self.writing.render(str(item_count), False, (255,255,255))
                 
                 text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
                 
                 display.blit(text, text_rect.topleft) if item_count > 1 else 0
-                
-                    
-                # pygame.draw.circle(display, (255,255,255), mouse_pos, 20)
                 
                 if self.selected_item and item_list[0].name == self.selected_item.name:
                     
@@ -246,19 +254,12 @@ class Inventory:
                     
                 col_rect = pygame.Rect(*pos, item_list[0].image.get_rect().width, item_list[0].image.get_rect().height)
                 if col_rect.collidepoint(mouse_pos):
-                    
-                    text_list = item_list[0].desc.split('lnbr')
-                    
-                    texts = [txt for txt in [self.writing.render(line,False, pygame.Color((255,255,255))) for line in text_list]]
-                    texts_width = [txt.get_width() for txt in texts]
-                    
-                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 75, max(*texts_width), 50))
+
+                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 75, item_list[0].text_surf.get_width() +8 , 50))
                     pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 25, 8, 25))
                     
-                    
-                    for x, line in enumerate(text_list):
-                        
-                        display.blit(self.writing.render(line,False,  pygame.Color((255,255,255))), (pos[0] + 5, pos[1] - 70 + (20 * x)))
+                    display.blit(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))
+
                 
                 if col_rect.collidepoint(pygame.mouse.get_pos()):
                     
