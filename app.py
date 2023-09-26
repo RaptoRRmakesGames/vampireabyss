@@ -29,10 +29,6 @@ pygame.mouse.set_visible(False)
 pygame.display.set_caption("Vampire's Abyss")
 pygame.display.set_icon(pygame.image.load('assets/logo/logo.png'))
 
-
-# small_font = pygame.font.Font('assets/fonts/ttfs/pixuf.ttf', 16)
-# small_font = pygame.font.Font('assets/fonts/ttfs/pixuf.ttf', 32)
-
 def change_color(img,  new_color):
     for x in range(img.get_width()):
         for y in range(img.get_height()):

@@ -21,7 +21,7 @@ class ItemDrop:
         
         self.rect.y += self.vel[1] * dt
         
-        self.vel[1] = pygame.math.Vector2(self.vel).move_towards((0,0), (0.01)).y 
+        self.vel[1] = pygame.math.Vector2(self.vel).move_towards((0,0), (0.01)).y  * dt
         
         if self.vel[1] == 0:
             
@@ -106,7 +106,7 @@ class Enemy:
         
     def update(self, player,dt):
         self.dx,self.dy = 0,0
-        self.cap_velocity(1)
+        self.cap_velocity(6)
         if not self.dead:
             self.dx += self.vel[0]
             self.dy += self.vel[1]
