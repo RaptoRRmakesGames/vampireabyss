@@ -47,6 +47,9 @@ class Item:
             self.text_surf.blit(img, (0, i * 16))
 
         self.text_surf.set_colorkey((0,0,0))
+        
+        self.name_img = med_font.render(self.name, False, (0,100,255)).convert_alpha()
+        self.name_img.set_colorkey((0,0,0))
 
         self.stack_size = stack_size
         
@@ -60,7 +63,7 @@ class Item:
     
 item_dict = {
     'compass' : Item('util', 'Compass', pygame.image.load('assets/images/icons/compass.png').convert_alpha(), desc='Colours your Minimap lnbrTo show you the Way'),
-    'spoon' : Item('util', 'Comically Big Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha(), desc='Increases your Hit Range lnbr'),
+    'spoon' : Item('util', 'Comically Large Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha(), desc='Increases your Hit Range lnbr'),
     'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha(), desc='Vastly Increases Damage lnbrBut lowers your endurance'),
     'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrIn order to heal yourself'),
 }
@@ -105,8 +108,6 @@ class Inventory:
             'test': self.test_surf
             
         }
-        
-        
         
         self.clicked = False
         
@@ -241,8 +242,6 @@ class Inventory:
 
                 display.blit(item_list[0].image, (pos[0] , pos[1] ))
                 
-                # display.blit(outline(item_list[0].image), pos)
-                
                 text = self.writing.render(str(item_count), False, (255,255,255))
                 
                 text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
@@ -256,10 +255,11 @@ class Inventory:
                 col_rect = pygame.Rect(*pos, item_list[0].image.get_rect().width, item_list[0].image.get_rect().height)
                 if col_rect.collidepoint(mouse_pos):
 
-                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 75, item_list[0].text_surf.get_width() +8 , 50))
+                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 95, item_list[0].text_surf.get_width() +8 , 70))
                     pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 25, 8, 25))
                     
                     display.blit(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))
+                    display.blit(item_list[0].name_img, (pos[0]+ 5, pos[1] - 90))
 
                 
                 if col_rect.collidepoint(pygame.mouse.get_pos()):
