@@ -35,8 +35,9 @@ class Item:
         self.rect = pygame.Rect(0,0, 36,36)
         self.desc = desc
         
+        self.image.blit(outline(self.image), (0,0))
         imgs = [med_font.render(line, False, (255,255,255)).convert_alpha() for line in desc.split('lnbr')]
-        largest_width = sorted(imgs, key= lambda x : x.get_width())[0].get_width()
+        largest_width = sorted(imgs, key= lambda x : x.get_width(), reverse=True)[0].get_width()
         
         self.text_surf = pygame.Surface(
             (largest_width + 10, 16 * len(imgs) )
@@ -240,7 +241,7 @@ class Inventory:
 
                 display.blit(item_list[0].image, (pos[0] , pos[1] ))
                 
-                display.blit(outline(item_list[0].image), pos)
+                # display.blit(outline(item_list[0].image), pos)
                 
                 text = self.writing.render(str(item_count), False, (255,255,255))
                 
