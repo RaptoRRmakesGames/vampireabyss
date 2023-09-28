@@ -462,7 +462,7 @@ class Game:
         self.draw_text(med_font, 'Speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', (5,50), pygame.Color(0,250,250))
         self.draw_text(med_font, 'Damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', (5,68), pygame.Color(0,250,250))
 
-        self.player.inventory.render(self.display, self.mouse_pos)
+        self.player.inventory.render(self.display, self.mouse_pos, self.dt, self.scroll)
 
         if self.state == 'game':
             ttime = str(round(time()-self.time_from_start,1))

@@ -53,6 +53,38 @@ class Item:
 
         self.stack_size = stack_size
         
+        self.dropped = False 
+        
+        self.inventory = None 
+    
+    def set_inventory(self, inventory):
+        
+        self.inventory = inventory
+    
+    def drop(self):
+        
+        self.dropped = True
+        
+        self.vel_y = 2    
+        
+        self.pos = self.inventory.player.rect.center 
+    
+    def update_dropped(self, dt):
+        
+        if self.vel_y > 0:
+            
+            self.vel_y -= 0.1 * dt 
+            
+        self.pos[1] += self.vel_y
+        
+    def render_dropped(self, display : pygame.Surface, scroll=[0,0]):
+        
+        render_rect = pygame.FRect(self.pos[0] - scroll[0], self.pos[1] - scroll[1], *self.rect.size)
+        
+        display.fblits([(self.image, render_rect)])
+        
+        print('render')
+        
     def list(self):
         
         return  '{}, {}'.format(self.tag, self.name)
@@ -91,6 +123,8 @@ class Inventory:
         self.writing = med_font#Writing(10)
         
         self.selected_item=  None
+        
+        self.dropped_items = []
         
         self.weapon_surf = pygame.Surface((32,32)).convert_alpha()
         self.weapon_surf.fill((150,255,255))
@@ -135,6 +169,8 @@ class Inventory:
             
             return 
         
+        self.items[itemname][0].drop()
+        self.dropped_items.append(self.items[itemname][0])
         self.items[itemname].pop(0)
         self.affect_player()
 
@@ -222,7 +258,7 @@ class Inventory:
                 
                 self.vel = 0 
            
-    def render(self, display, mouse_pos):
+    def render(self, display, mouse_pos, dt=1, scroll=[0,0]):
         
         if display.get_rect().colliderect(self.rect):
             
@@ -238,7 +274,7 @@ class Inventory:
                 
                 pos = [self.item_positions[x][0] , self.item_positions[x][1]  -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
 
-                display.fblits(([self.item_background_colors[item_list[0].tag], (pos)]))
+                display.fblits([(self.item_background_colors[item_list[0].tag], (pos))])
 
                 display.fblits([(item_list[0].image, (pos[0] , pos[1] ))])
                 
@@ -260,9 +296,6 @@ class Inventory:
                     
                     display.fblits([(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))])
                     display.fblits([(item_list[0].name_img, (pos[0]+ 5, pos[1] - 90))])
-
-                
-                if col_rect.collidepoint(pygame.mouse.get_pos()):
                     
                     if pygame.mouse.get_pressed()[0] and not self.clicked:
                         
@@ -270,6 +303,11 @@ class Inventory:
                         
                         self.clicked = True
                         
+
+                for item in self.dropped_items:
+                    item.update_dropped(dt)
+                    item.render_dropped(display, scroll)
+                            
                 if not pygame.mouse.get_pressed()[0]:
                     
                     self.clicked = False
