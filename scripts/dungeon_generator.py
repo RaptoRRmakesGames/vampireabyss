@@ -173,7 +173,7 @@ class Dungeon:
                     room_poses.append((grid[1].image, (render_rect.x - 16, render_rect.y - 16)))
                     # grid[1].render(display, offset)
                     
-        display.blits(room_poses)
+        display.fblits(room_poses)
                     
         # display.blit(room_writing.write(f'level: {self.level}', pygame.Color(255,255,255)), (self.middle_room_pos[0] - offset[0] - 40, self.middle_room_pos[1] - offset[1] - 8))
                     

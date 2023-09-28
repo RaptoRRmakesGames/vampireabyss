@@ -41,7 +41,7 @@ class ItemDrop:
         
         render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], *self.rect.size)
         
-        display.blit(self.drop.image, render_rect.topleft)
+        display.fblits([(self.drop.image, render_rect.topleft)])
             
         
         

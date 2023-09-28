@@ -1,4 +1,4 @@
-import os 
+import os
 
 def count_lines_in_current_folder():
     folder_path = os.getcwd()

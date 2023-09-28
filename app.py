@@ -354,9 +354,8 @@ class Game:
         self.state = 'menu'
         
     def draw_text(self, writing, text:str, pos:(0,0), color=(255,255,255)):
+        self.display.fblits([(writing.render(text, False, color), pos)])
         
-        #self.display.blit(writing.write(str(text), pygame.Color(color)), pos)
-        self.display.blit(writing.render(text, False, color), pos)
 
     def draw_cursor(self):
         
@@ -365,9 +364,9 @@ class Game:
             self.mouse_pos[1] - self.light_eng.get_light_surf('mouse_glow').get_height()//2
             ),)
                 
-        self.display.blit(self.assets['mouse_png'], (
+        self.display.fblits([(self.assets['mouse_png'], (
             self.mouse_pos[0], self.mouse_pos[1] - 2
-            ))
+            ))])
 
     def start_game(self):
         
@@ -409,12 +408,12 @@ class Game:
             # self.display.blit(outline_img,(pos) )
         
         # self.display.blits((self.assets['bat_glow'], (pos[0]-24, pos[1]-32)) for pos in self.bat_pos)    
-        self.display.blits((self.bat_anim.get_image(), pos) for pos in self.bat_pos)
-        self.display.blits((outline_img, pos) for pos in self.bat_pos)
+        self.display.fblits((self.bat_anim.get_image(), pos) for pos in self.bat_pos)
+        self.display.fblits((outline_img, pos) for pos in self.bat_pos)
         
         
         
-        self.display.blit(self.main_menu_anim.get_image(),(self.display.get_width()//2 - 125, 40) )   
+        self.display.fblits([(self.main_menu_anim.get_image(),(self.display.get_width()//2 - 125, 40))] )   
         
         for button in self.main_menu_buttons:
             
@@ -470,7 +469,7 @@ class Game:
             img = large_font.render(f"{ttime.split('.')[0]}.{ttime.split('.')[1]}", False, (255,255,255))
             time_rect = img.get_rect(center = (self.display.get_width()//2, 20))
             
-            self.display.blit(img, (time_rect.x, time_rect.y))
+            self.display.fblits([(img, (time_rect.x, time_rect.y))])
             
             self.minimap.render(self.display, self.player)
     
@@ -490,7 +489,7 @@ class Game:
         
         self.player.render(self.display, self.scroll)
         
-        self.display.blit(self.player.inventory.selected_item.image, pygame.mouse.get_pos()) if self.player.inventory.selected_item else 0 
+        self.display.fblits([(self.player.inventory.selected_item.image, pygame.mouse.get_pos())]) if self.player.inventory.selected_item else 0 
         
     def _collisions(self):
         
@@ -561,7 +560,7 @@ class Game:
             
             self.display.blit(self.light_eng.get_base_surf(), (0,0), special_flags=BLEND_RGB_MULT)
         
-        self.display.blit(self.assets['vignette'], self.vignete_cord )
+        self.display.fblits([(self.assets['vignette'], self.vignete_cord )])
     
     def update(self):
         

@@ -67,13 +67,13 @@ class Minimap:
         )
         self.hallway_surface.set_colorkey((0,0,0))
         
-        self.room_surface.blit(self.hallway_surface, (0,0))
+        self.room_surface.fblits([(self.hallway_surface, (0,0))])
             
         
     def render(self, display, player):
         self.background.fill((0,0,0, 0))
 
-        self.background.blit(self.room_surface, (0,0))
+        self.background.fblits([(self.room_surface, (0,0))])
         # self.background.blit(self.hallway_surface, (-35,-35))
         player_rect = pygame.Rect(
             player.rect.x // self.diffrence- self.game.dungeon.leftest//self.diffrence,
@@ -84,4 +84,4 @@ class Minimap:
         pygame.draw.circle(self.background, (0,0,0), player_rect.center, 2, 1)
         # pygame.draw.circle(self.background, (0,0,0), player_rect.center, 1, 2)
        
-        display.blit(self.background, self.pos)
+        display.fblits([(self.background, self.pos)])

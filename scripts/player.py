@@ -238,15 +238,15 @@ class Inventory:
                 
                 pos = [self.item_positions[x][0] , self.item_positions[x][1]  -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
 
-                display.blit(self.item_background_colors[item_list[0].tag], (pos))
+                display.fblits(([self.item_background_colors[item_list[0].tag], (pos)]))
 
-                display.blit(item_list[0].image, (pos[0] , pos[1] ))
+                display.fblits([(item_list[0].image, (pos[0] , pos[1] ))])
                 
                 text = self.writing.render(str(item_count), False, (255,255,255))
                 
                 text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
                 
-                display.blit(text, text_rect.topleft) if item_count > 1 else 0
+                display.fblits([(text, text_rect.topleft)]) if item_count > 1 else 0
                 
                 if self.selected_item and item_list[0].name == self.selected_item.name:
                     
@@ -258,8 +258,8 @@ class Inventory:
                     pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 95, item_list[0].text_surf.get_width() +8 , 70))
                     pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 25, 8, 25))
                     
-                    display.blit(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))
-                    display.blit(item_list[0].name_img, (pos[0]+ 5, pos[1] - 90))
+                    display.fblits([(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))])
+                    display.fblits([(item_list[0].name_img, (pos[0]+ 5, pos[1] - 90))])
 
                 
                 if col_rect.collidepoint(pygame.mouse.get_pos()):
@@ -824,7 +824,7 @@ class Player:
         # pygame.draw.circle(display, (0,0,0), self.render_rect.center, 3)
         
         if nocap:
-            display.blit(self.image, (self.rect.x - offset[0] , self.rect.y - offset[1] ))
+            display.fblits([(self.image, (self.rect.x - offset[0] , self.rect.y - offset[1] ))])
             
             # pygame.draw.circle(display, (255,255,255), self.pos + pygame.math.Vector2(400 + 29,300 - 57), 16)
             

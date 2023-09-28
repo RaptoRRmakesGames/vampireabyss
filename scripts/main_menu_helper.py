@@ -54,7 +54,7 @@ class Button:
         
         
         pygame.draw.rect(display, self.color,pygame.Rect(self.rect.x - offset[0], self.rect.y - offset[1], self.width, self.height))
-        display.blit(self.font.render(self.text, False, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))
+        display.fblits([(self.font.render(self.text, False, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))])
         # display.blit(self.writing.write(self.text, self.text_color), (self.rect.center[0] + self.cto[0]-offset[0], self.rect.center[1] + self.cto[1]-offset[1]))
         
     def click_execute_fun(self, *args):

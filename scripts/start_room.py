@@ -14,7 +14,7 @@ class Start_Room:
         
         render_rect = pygame.Rect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width,self.rect.height)
           
-        display.blit(self.image, render_rect)
+        display.fblits([(self.image, render_rect)])
         
 
         

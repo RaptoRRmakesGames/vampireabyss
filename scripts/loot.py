@@ -229,6 +229,6 @@ class NextLevelBlock:
         
         pygame.draw.rect(display, (255,255,255), self.render_rect)
         
-        display.blit(self.writing.render('Next', False, (0,0,0)), (self.render_rect.centerx - self.width//2 + 6, self.render_rect.centery - self.height//2 + 23))
-        display.blit(self.writing.render('Level', False, (0,0,0)), (self.render_rect.centerx - self.width//2 + 6, self.render_rect.centery - self.height//2 + 78))
+        display.fblits([(self.writing.render('Next', False, (0,0,0)), (self.render_rect.centerx - self.width//2 + 6, self.render_rect.centery - self.height//2 + 23))])
+        display.fblits([(self.writing.render('Level', False, (0,0,0)), (self.render_rect.centerx - self.width//2 + 6, self.render_rect.centery - self.height//2 + 78))])
         
