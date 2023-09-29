@@ -232,6 +232,7 @@ class Game:
         self.player.inventory.add_item(item_dict['spoon'])
         self.player.inventory.add_item(item_dict['vial'])
         self.player.inventory.add_item(item_dict['fang_extendors'])
+        self.player.inventory.add_item(item_dict['stim'])
         
         self.combat_system = CombatSystem(self)
         
@@ -487,6 +488,8 @@ class Game:
         
         self.dungeon.powerup_manager.render_powerups(self.display, self.scroll)
         
+        self.player.inventory.render_dropped_items(self.dt, self.display, self.scroll)
+        
         self.player.render(self.display, self.scroll)
         
         self.display.fblits([(self.player.inventory.selected_item.image, pygame.mouse.get_pos())]) if self.player.inventory.selected_item else 0 
@@ -597,6 +600,8 @@ class Game:
             
             self.update_camera()
               
+            
+              
             self.player.inventory.update(self.dt)
             
             
@@ -636,6 +641,7 @@ class Game:
             
             self.start_room.render(self.display, self.scroll)
             self.player.render(self.display, self.scroll, True)
+            self.player.inventory.render_dropped_items(self.dt, self.display, self.scroll)
             
             
             if self.do_lighting:

@@ -32,7 +32,7 @@ class Item:
         self.tag = tag 
         self.name = name 
         self.image = img
-        self.rect = pygame.Rect(0,0, 36,36)
+        self.rect = pygame.FRect(0,0, 36,36)
         self.desc = desc
         
         self.image.blit(outline(self.image), (0,0))
@@ -56,34 +56,53 @@ class Item:
         self.dropped = False 
         
         self.inventory = None 
+        
+        self.remove_from_dropped = False
+    
     
     def set_inventory(self, inventory):
         
         self.inventory = inventory
+        
+    def pickup(self):
+        
+        self.remove_from_dropped = True
+        
+        self.inventory.add_item(self.copy())
     
     def drop(self):
         
         self.dropped = True
         
-        self.vel_y = 2    
+        self.vel_y = 0.5
         
-        self.pos = self.inventory.player.rect.center 
+        self.pos = list(self.inventory.player.rect.topleft )
+        
+    def copy(self):
+        
+        return Item(self.tag, self.name, self.image, self.stack_size, desc=self.desc)
     
     def update_dropped(self, dt):
         
-        if self.vel_y > 0:
+        # if self.vel_y > 0:
             
-            self.vel_y -= 0.1 * dt 
+        #     self.vel_y -= 0.1 * dt 
+            
+        self.vel_y = pygame.math.Vector2((0, self.vel_y)).move_towards((0,0), 0.1*dt).y
             
         self.pos[1] += self.vel_y
+        
+        if pygame.FRect(*self.pos, 36,36).colliderect(self.inventory.player.rect):
+            
+            if self.vel_y == 0:
+                
+                self.pickup()
         
     def render_dropped(self, display : pygame.Surface, scroll=[0,0]):
         
         render_rect = pygame.FRect(self.pos[0] - scroll[0], self.pos[1] - scroll[1], *self.rect.size)
         
-        display.fblits([(self.image, render_rect)])
-        
-        print('render')
+        display.fblits([(self.image, render_rect.topleft)])
         
     def list(self):
         
@@ -98,6 +117,7 @@ item_dict = {
     'spoon' : Item('util', 'Comically Large Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha(), desc='Increases your Hit Range lnbr'),
     'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha(), desc='Vastly Increases Damage lnbrBut lowers your endurance'),
     'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrIn order to heal yourself'),
+    'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers your health lnbr But gives a speed boost'),
 }
 
 class Inventory:
@@ -151,13 +171,24 @@ class Inventory:
         
         return list(self.items.keys())
     
+    def render_dropped_items(self, dt, display, scroll):
+        
+        for item in self.dropped_items:
+            item.update_dropped(dt)
+            item.render_dropped(display, scroll)
+            
+            if item.remove_from_dropped:
+                
+                self.dropped_items.remove(item)
+    
     def remove_item(self, itemname, count=1):
-        
-        
-        
+
         if len(self.items[itemname]) == 1:
         
-            self.items[itemname].pop(0)
+            self.items[itemname][0].set_inventory(self)
+            self.items[itemname][0].drop()
+            self.dropped_items.append(self.items[itemname][0])
+            # self.items[itemname].pop(0)
             
             del self.items[itemname]
             
@@ -303,10 +334,7 @@ class Inventory:
                         
                         self.clicked = True
                         
-
-                for item in self.dropped_items:
-                    item.update_dropped(dt)
-                    item.render_dropped(display, scroll)
+                # print(self.dropped_items)
                             
                 if not pygame.mouse.get_pressed()[0]:
                     
@@ -321,6 +349,8 @@ class Inventory:
         
         item_name_list = [item[0].name for item in all_items ]
         
+        base_player_hp = 3
+        
         if 'Comically Big Spoon' in item_name_list:
             
             self.player.big_spoon_buff = 10
@@ -328,16 +358,14 @@ class Inventory:
             self.player.big_spoon_buff = 0
 
         if 'Blood Vial' in item_name_list:
-            
-            self.player.max_hp = 2
-            if self.player.hp > self.player.max_hp:
-                self.player.hp = self.player.max_hp
+            base_player_hp -= 1 
+            # if self.player.hp > self.player.max_hp:
+            #     self.player.hp = self.player.max_hp
             self.player.base_powers['damage'] = 1.7
             self.player.refresh_powers()
         else:
-            self.player.max_hp = 3
-            if self.player.hp > self.player.max_hp:
-                self.player.hp = self.player.max_hp
+            # if self.player.hp > self.player.max_hp:
+            #     self.player.hp = self.player.max_hp
             self.player.base_powers['damage'] = 1
             self.player.refresh_powers()
             
@@ -345,6 +373,16 @@ class Inventory:
             self.player.lifesteal = True
         else:
             self.player.lifesteal = False
+        if 'Stim Pack' in item_name_list:
+            base_player_hp -= 1 
+            
+        else:
+            pass 
+            
+        self.player.max_hp = base_player_hp
+        if self.player.hp > self.player.max_hp:
+            self.player.hp = self.player.max_hp
+        
 
 class Player:
     
