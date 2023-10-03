@@ -117,7 +117,7 @@ item_dict = {
     'spoon' : Item('util', 'Comically Large Spoon', pygame.image.load('assets/images/icons/spoon.png').convert_alpha(), desc='Increases your Hit Range lnbr'),
     'vial' : Item('util', 'Blood Vial', pygame.image.load('assets/images/icons/vial.png').convert_alpha(), desc='Vastly Increases Damage lnbrBut lowers your endurance'),
     'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrIn order to heal yourself'),
-    'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers your health lnbr But gives a speed boost'),
+    'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers yourlnbrhealth, But gives a speed boost'),
 }
 
 class Inventory:
@@ -373,11 +373,14 @@ class Inventory:
             self.player.lifesteal = True
         else:
             self.player.lifesteal = False
+            
         if 'Stim Pack' in item_name_list:
             base_player_hp -= 1 
-            
+            self.player.base_powers['speed'] = 1.2
+            self.player.refresh_powers()
         else:
-            pass 
+            self.player.base_powers['speed'] = 1
+            self.player.refresh_powers()
             
         self.player.max_hp = base_player_hp
         if self.player.hp > self.player.max_hp:
