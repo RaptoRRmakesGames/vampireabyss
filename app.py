@@ -7,7 +7,7 @@ from random import randint
 from scripts.room import Room, BlankRoom
 from scripts.dungeon_generator import Dungeon
 from scripts.minimap import Minimap
-from scripts.player import Player, item_dict
+from scripts.player import Player, item_dict, weapons_dict
 from scripts.combat_manager import CombatSystem
 from scripts.filehandling import loadvar, savevar
 from scripts.main_menu_helper import Button, MultiSelect
@@ -194,7 +194,7 @@ class Game:
         
         self.zoom =2
         
-        flags = pygame.SCALED | pygame.FULLSCREEN if not debug else 0
+        flags = pygame.SCALED | pygame.FULLSCREEN | pygame.HWSURFACE if not debug else 0
         self.display = pygame.display.set_mode((1280/self.zoom, 720/self.zoom), flags=flags)
         self.main_menu_color = (16,18,28)
         self.game_color = (12,15,28)
@@ -223,16 +223,17 @@ class Game:
         self.minimap = Minimap(self, (self.display.get_width() - 110,10), (150,150))
         self.player = Player(self.start_room.rect.center, 0.1, self.dungeon.middle_room, self)
         
-        
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
         
         self.player.inventory.add_item(item_dict['compass'])
+        # self.player.inventory.add_item(item_dict['spoon'])
         self.player.inventory.add_item(item_dict['spoon'])
         self.player.inventory.add_item(item_dict['vial'])
         self.player.inventory.add_item(item_dict['fang_extendors'])
         self.player.inventory.add_item(item_dict['stim'])
+        self.player.inventory.add_item(weapons_dict['axe'])
         
         self.combat_system = CombatSystem(self)
         
@@ -458,7 +459,7 @@ class Game:
 
         self.draw_text(med_more_font, 'Coins: '+str(self.player.coins), (5,5), pygame.Color(255,255,0))
         if self.state == 'game':
-            self.draw_text(med_more_font, 'Health: '+str(self.player.hp), (5,28), pygame.Color(0,250,250))
+            self.draw_text(med_more_font, 'Health: '+str(self.player.hp), (5,28), pygame.Color(250,0,0))
 
         self.draw_text(med_font, 'Speed: '+str(int((self.player.powers['speed'] /self.player.speed) * 10) ) + '%', (5,50), pygame.Color(0,250,250))
         self.draw_text(med_font, 'Damage: '+str(int((self.player.powers['damage'] /self.player.damage) * 100) ) + '%', (5,68), pygame.Color(0,250,250))

@@ -31,7 +31,7 @@ class Item:
         
         self.tag = tag 
         self.name = name 
-        self.image = img
+        self.image = pygame.transform.scale(img, (32,32))
         self.rect = pygame.FRect(0,0, 36,36)
         self.desc = desc
         
@@ -119,6 +119,10 @@ item_dict = {
     'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrIn order to heal yourself'),
     'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers yourlnbrhealth, But gives a speed boost'),
 }
+weapons_dict = {
+    'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(), desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
+    'axe2' : Item('weapon', 'Frozen Axe 2', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(), desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
+}
 
 class Inventory:
     
@@ -159,7 +163,6 @@ class Inventory:
             
             'weapon' : self.weapon_surf,
             'util' : self.util_surf,
-            'test': self.test_surf
             
         }
         
@@ -262,6 +265,8 @@ class Inventory:
                     self.rendered_dict[itemkey] = {}
                     self.rendered_dict[itemkey] = [item, 1]
                     
+        self.sort_by_tag()
+                    
     def update(self, dt):
         
         if self.player.game.time == 25:
@@ -289,6 +294,25 @@ class Inventory:
                 
                 self.vel = 0 
            
+    def sort_by_tag(self):
+        
+        # first weapons, then utils
+        
+        self.key_list = []
+        
+        for key in self.rendered_dict:
+            
+            item_list = self.rendered_dict[key]
+            
+            tag = item_list[0].tag
+            
+            if tag == 'weapon':
+                
+                self.key_list.insert(0, item_list[0].name)
+            else:
+                
+                self.key_list.append(item_list[0].name)
+    
     def render(self, display, mouse_pos, dt=1, scroll=[0,0]):
         
         if display.get_rect().colliderect(self.rect):
@@ -296,7 +320,7 @@ class Inventory:
             pygame.draw.rect(display, (100,100,100), self.rect)
             pygame.draw.rect(display, (0,0,0), self.rect, 5)
             
-            for x, itemkey in enumerate(list(self.rendered_dict.keys())):
+            for x, itemkey in enumerate(self.key_list):
                 
                 
                 item_list = self.rendered_dict[itemkey]
