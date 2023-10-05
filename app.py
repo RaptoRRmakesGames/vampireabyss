@@ -788,10 +788,10 @@ class Game:
                         if event.key == k:
                             
                             try:
-                            
-                                self.player.inventory.selected_item = list(self.player.inventory.items.values())[i][0] if self.player.inventory.selected_item != list(self.player.inventory.items.values())[i][0] else None
-                            except IndexError:
+                                print(self.player.inventory.val_list)
+                                self.player.inventory.selected_item = self.player.inventory.val_list[i]
                                 
+                            except KeyError:
                                 pass
             # update the screen
             pygame.display.update()

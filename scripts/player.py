@@ -299,20 +299,24 @@ class Inventory:
         # first weapons, then utils
         
         self.key_list = []
+        self.val_list = []
         
-        for key in self.rendered_dict:
+        for item_list in list(self.rendered_dict.values()):
             
-            item_list = self.rendered_dict[key]
+            
             
             tag = item_list[0].tag
             
             if tag == 'weapon':
                 
                 self.key_list.insert(0, item_list[0].name)
+                self.val_list.insert(0, item_list[0])
             else:
                 
                 self.key_list.append(item_list[0].name)
-    
+                self.val_list.append(item_list[0])
+                
+                
     def render(self, display, mouse_pos, dt=1, scroll=[0,0]):
         
         if display.get_rect().colliderect(self.rect):
@@ -374,6 +378,7 @@ class Inventory:
         item_name_list = [item[0].name for item in all_items ]
         
         base_player_hp = 3
+        base_player_damage = 1
         
         if 'Comically Big Spoon' in item_name_list:
             
@@ -385,12 +390,13 @@ class Inventory:
             base_player_hp -= 1 
             # if self.player.hp > self.player.max_hp:
             #     self.player.hp = self.player.max_hp
-            self.player.base_powers['damage'] = 1.7
+            # self.player.base_powers['damage'] = 1.7
+            base_player_damage += .2
             self.player.refresh_powers()
         else:
             # if self.player.hp > self.player.max_hp:
             #     self.player.hp = self.player.max_hp
-            self.player.base_powers['damage'] = 1
+            # self.player.base_powers['damage'] = 1
             self.player.refresh_powers()
             
         if 'Fang Extendors' in item_name_list:
@@ -400,15 +406,23 @@ class Inventory:
             
         if 'Stim Pack' in item_name_list:
             base_player_hp -= 1 
-            self.player.base_powers['speed'] = 1.2
+            self.player.base_powers['speed'] = 1.201
             self.player.refresh_powers()
         else:
             self.player.base_powers['speed'] = 1
             self.player.refresh_powers()
             
+        if 'Frozen Axe' in item_name_list:
+            
+            base_player_damage += .4
+            
         self.player.max_hp = base_player_hp
         if self.player.hp > self.player.max_hp:
             self.player.hp = self.player.max_hp
+            
+        self.player.base_powers['damage'] = base_player_damage
+        
+        self.player.refresh_powers()
         
 
 class Player:
