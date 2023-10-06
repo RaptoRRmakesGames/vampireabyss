@@ -228,13 +228,11 @@ class Game:
 
         self.minimap.feed_hallways(self.dungeon.hallways)
         
-        self.player.inventory.add_item(item_dict['compass'])
-        self.player.inventory.add_item(item_dict['spoon'])
-        self.player.inventory.add_item(item_dict['spoon'])
-        self.player.inventory.add_item(item_dict['vial'])
-        self.player.inventory.add_item(item_dict['fang_extendors'])
-        self.player.inventory.add_item(item_dict['stim'])
         self.player.inventory.add_item(weapons_dict['axe'])
+        self.player.inventory.add_item(weapons_dict['sicles'])
+        self.player.inventory.add_item(weapons_dict['blades'])
+        self.player.inventory.add_item(weapons_dict['katana'])
+        self.player.inventory.add_item(item_dict['compass'])
         
         self.combat_system = CombatSystem(self)
         

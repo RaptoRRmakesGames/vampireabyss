@@ -121,7 +121,9 @@ item_dict = {
 }
 weapons_dict = {
     'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(), desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
-    'axe2' : Item('weapon', 'Frozen Axe 2', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(), desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
+    'sicles' : Item('weapon', "Devil's Sicles", pygame.image.load('assets/images/weapons/sicles.png').convert_alpha(), desc='These divine Sicles are sentlnbrstraight from Hells hottest level'),
+    'blades' : Item('weapon', "Zeus's Hidden Blades", pygame.image.load('assets/images/weapons/hidden_blade.png').convert_alpha(), desc='Handcrafted from Zeus himself,lnbrThese blades strike lighting fast and stun'),
+    'katana' : Item('weapon', "Fujin's Sword", pygame.image.load('assets/images/weapons/katana.png').convert_alpha(), desc='Created in Fujins finest forgery,lnbrThis Katana will slice flesh like its wind'),
 }
 
 class Inventory:
@@ -151,7 +153,7 @@ class Inventory:
         self.dropped_items = []
         
         self.weapon_surf = pygame.Surface((32,32)).convert_alpha()
-        self.weapon_surf.fill((150,255,255))
+        self.weapon_surf.fill((75,180,180))
         
         self.util_surf = pygame.Surface((32,32)).convert_alpha()
         self.util_surf.fill((150,150,60))
