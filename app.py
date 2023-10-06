@@ -206,6 +206,7 @@ class Game:
         self.load_assets()
         
         self.state = 'start_room' if not debug else 'game'
+        self.old_state = 'start_room'
         
         self.room_count = (10,10)
         
@@ -228,7 +229,7 @@ class Game:
         self.minimap.feed_hallways(self.dungeon.hallways)
         
         self.player.inventory.add_item(item_dict['compass'])
-        # self.player.inventory.add_item(item_dict['spoon'])
+        self.player.inventory.add_item(item_dict['spoon'])
         self.player.inventory.add_item(item_dict['spoon'])
         self.player.inventory.add_item(item_dict['vial'])
         self.player.inventory.add_item(item_dict['fang_extendors'])
@@ -357,7 +358,6 @@ class Game:
         
     def draw_text(self, writing, text:str, pos:(0,0), color=(255,255,255)):
         self.display.fblits([(writing.render(text, False, color), pos)])
-        
 
     def draw_cursor(self):
         
@@ -372,11 +372,20 @@ class Game:
 
     def start_game(self):
         
+        if self.old_state == 'start_room':
+            self.state = 'start_room' 
+            return
+        
+        
         self.time_from_start = time()
         self.state = 'game' 
         self.started_game = True
         
+        # print('ha')
+        
     def goto_settings(self):
+        
+        self.old_state = self.state
         
         self.state = 'settings'
         
@@ -393,27 +402,18 @@ class Game:
         self.fps_cap = int(self.fps_choices.get_choice())
         
     def main_menu(self):
-        # self.display.blit(self.writings['fps'].write(str(round(self.clock.get_fps()))+ 'fps', pygame.Color(255,255,255)) , (self.ui_cords['right'] - 45, self.ui_cords['bottom']-8))
         self.draw_text(med_font, str(round(self.clock.get_fps()))+ 'fps', (self.ui_cords['right'] - 55, self.ui_cords['bottom']-15), (255,255,255))
         
         
         self.main_menu_anim.update()
         self.bat_anim.update()
         
-        
-        # for pos in self.bat_pos:
         outline_img = self.cached_outlines[self.bat_anim.get_image()]
         for pos in self.bat_pos:
             self.light_eng.render_unnat_light(self.display, 'bat_glow', (pos[0] - 24, pos[1]- 31))
-            # draw_lighted_image(self.display, self.assets['bat_glow'], (pos[0] - 24, pos[1]- 31))
-            # self.display.blit(self.bat_anim.get_image(),(pos))   
-            # self.display.blit(outline_img,(pos) )
-        
-        # self.display.blits((self.assets['bat_glow'], (pos[0]-24, pos[1]-32)) for pos in self.bat_pos)    
+
         self.display.fblits((self.bat_anim.get_image(), pos) for pos in self.bat_pos)
         self.display.fblits((outline_img, pos) for pos in self.bat_pos)
-        
-        
         
         self.display.fblits([(self.main_menu_anim.get_image(),(self.display.get_width()//2 - 125, 40))] )   
         
@@ -509,11 +509,7 @@ class Game:
         self.player.update(self.scroll, self.dt)
         self.dungeon.update_enemies(self.player, self.dt)
         if self.dungeon.update_level_block(self.player) == 'refresh':
-            self.dungeon = self.dungeon.copy()
-            self.minimap.feed_rooms(self.dungeon.get_room_list())
-            self.minimap.feed_hallways(self.dungeon.hallways)
-            self.player.set_pos(self.dungeon.middle_room_pos)
-            self.save_all_data()
+            self.__refresh_room()
             
         self.dungeon.chest_manager.update_chests(self.player)
         self.dungeon.powerup_manager.update_powerups(self.dt, self.player)
@@ -601,8 +597,6 @@ class Game:
             
             self.update_camera()
               
-            
-              
             self.player.inventory.update(self.dt)
             
             
@@ -648,8 +642,6 @@ class Game:
             if self.do_lighting:
                 self._lighting()
             
-            
-            
             self.player.inventory.render(self.display, self.mouse_pos)
             
             self.update_ui()
@@ -690,10 +682,7 @@ class Game:
         self.camera_target[0] += ((target_x - self.camera_target[0]) / self.scroll_speed) *self.dt
         self.camera_target[1] += ((target_y - self.camera_target[1]) / self.scroll_speed)*self.dt
         
-
-    
         # Apply the camera target position as the scroll position
-        
         
         self.scroll[0] = round(self.camera_target[0])
         self.scroll[1] = round(self.camera_target[1])
@@ -783,12 +772,11 @@ class Game:
                     # refresh dungeon
                     self.task_manager.run_binds(event)
                 
-                    for i,  k in enumerate(self.player.inventory.slot_binds):
+                    for i, k in enumerate(self.player.inventory.slot_binds):
                         
                         if event.key == k:
                             
                             try:
-                                print(self.player.inventory.val_list)
                                 self.player.inventory.selected_item = self.player.inventory.val_list[i]
                                 
                             except KeyError:
