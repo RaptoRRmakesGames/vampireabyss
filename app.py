@@ -233,6 +233,7 @@ class Game:
         self.player.inventory.add_item(weapons_dict['blades'])
         self.player.inventory.add_item(weapons_dict['katana'])
         self.player.inventory.add_item(item_dict['compass'])
+        self.player.inventory.add_item(item_dict['vial'])
         
         self.combat_system = CombatSystem(self)
         

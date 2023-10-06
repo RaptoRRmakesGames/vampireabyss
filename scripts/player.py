@@ -416,7 +416,17 @@ class Inventory:
             
         if 'Frozen Axe' in item_name_list:
             
+            base_player_damage += .6
+        if "Devil's Sicles" in item_name_list:
+            
+            base_player_damage += .32
+        if "Zeus's Hidden Blades" in item_name_list:
+            
+            base_player_damage += .15
+        if "Fujin's Sword" in item_name_list:
+            
             base_player_damage += .4
+
             
         self.player.max_hp = base_player_hp
         if self.player.hp > self.player.max_hp:
