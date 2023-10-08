@@ -58,6 +58,8 @@ class Item:
         self.inventory = None 
         
         self.remove_from_dropped = False
+        
+        self.pickable = False
     
     
     def set_inventory(self, inventory):
@@ -70,13 +72,13 @@ class Item:
         
         self.inventory.add_item(self.copy())
     
-    def drop(self):
+    def drop(self, player=None, give_vel=True):
         
         self.dropped = True
         
-        self.vel_y = 0.5
+        self.vel_y = 0.5 if give_vel else 0
         
-        self.pos = list(self.inventory.player.rect.topleft )
+        self.pos = list(self.inventory.player.rect.topleft if self.inventory is not None else player.rect.topleft)
         
     def copy(self):
         
@@ -88,13 +90,21 @@ class Item:
             
         #     self.vel_y -= 0.1 * dt 
             
-        self.vel_y = pygame.math.Vector2((0, self.vel_y)).move_towards((0,0), 0.1*dt).y
+        self.vel_y = pygame.math.Vector2((0, self.vel_y)).move_towards((0,0), 0.15*dt).y
             
         self.pos[1] += self.vel_y
         
         if pygame.FRect(*self.pos, 36,36).colliderect(self.inventory.player.rect):
             
             if self.vel_y == 0:
+                
+                if self.tag == 'weapon':
+                    
+                    for item in list(self.inventory.items.values()):
+                        
+                        if item[0].tag == 'weapon':
+                            
+                            return
                 
                 self.pickup()
         
@@ -146,7 +156,7 @@ class Inventory:
         
         self.vel = 0
         
-        self.writing = med_font#Writing(10)
+        self.writing = med_font
         
         self.selected_item=  None
         
@@ -186,12 +196,12 @@ class Inventory:
                 
                 self.dropped_items.remove(item)
     
-    def remove_item(self, itemname, count=1):
+    def remove_item(self, itemname, count=1, give_vel = True):
 
         if len(self.items[itemname]) == 1:
         
             self.items[itemname][0].set_inventory(self)
-            self.items[itemname][0].drop()
+            self.items[itemname][0].drop(give_vel=give_vel)
             self.dropped_items.append(self.items[itemname][0])
             # self.items[itemname].pop(0)
             
@@ -238,6 +248,28 @@ class Inventory:
                     
                     return
 
+            if item.tag == 'weapon':
+                
+                for itemm in list(self.items.values()):
+                    if itemm[0].tag == 'weapon':
+                
+                        if item.name in list(self.items.keys()):
+                            
+                            self.items[item.name].append(item)
+                        
+                        else:
+                            
+                            self.items[item.name] = []
+                            self.items[item.name].append(item)
+                
+                        
+                        self.remove_item(item.name, True)
+                        item.vel_y =0
+                        return
+                    
+                    
+                        
+            
             if item.name in list(self.items.keys()):
                 if len(self.items[item.name]) -1 < item.stack_size:
                 
@@ -430,7 +462,7 @@ class Inventory:
             
         self.player.max_hp = base_player_hp
         if self.player.hp > self.player.max_hp:
-            self.player.hp = self.player.max_hp
+            self.player.hp = max(self.player.max_hp, 1)
             
         self.player.base_powers['damage'] = base_player_damage
         

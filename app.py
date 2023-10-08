@@ -235,6 +235,8 @@ class Game:
         self.player.inventory.add_item(item_dict['compass'])
         self.player.inventory.add_item(item_dict['vial'])
         
+        
+        
         self.combat_system = CombatSystem(self)
         
         self.scroll = [0,0]
