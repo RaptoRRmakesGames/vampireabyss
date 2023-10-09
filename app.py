@@ -27,7 +27,7 @@ pygame.init()
 pygame.display.init()
 pygame.mouse.set_visible(False)
 pygame.display.set_caption("Vampire's Abyss")
-pygame.display.set_icon(pygame.image.load('assets/logo/logo.png'))
+pygame.display.set_icon(pygame.image.load('assets/logo/logo.png').convert_alpha())
 
 def change_color(img,  new_color):
     for x in range(img.get_width()):
@@ -233,6 +233,9 @@ class Game:
         self.player.inventory.add_item(weapons_dict['blades'])
         self.player.inventory.add_item(weapons_dict['katana'])
         self.player.inventory.add_item(item_dict['compass'])
+        self.player.inventory.add_item(item_dict['spoon'])
+        self.player.inventory.add_item(item_dict['fang_extendors'])
+        self.player.inventory.add_item(item_dict['stim'])
         self.player.inventory.add_item(item_dict['vial'])
         
         
@@ -494,8 +497,6 @@ class Game:
         
         self.player.render(self.display, self.scroll)
         
-        self.display.fblits([(self.player.inventory.selected_item.image, pygame.mouse.get_pos())]) if self.player.inventory.selected_item else 0 
-        
     def _collisions(self):
         
         self.keep_player_in_rooms()
@@ -711,7 +712,7 @@ class Game:
             self.goto_main_menu()
             
     def __remove_inv_item(self):
-        if self.player.inventory.open and self.player.inventory.selected_item:
+        if self.player.inventory.selected_item:
 
             self.player.inventory.remove_item(self.player.inventory.selected_item.name)
             
@@ -781,6 +782,8 @@ class Game:
                                 self.player.inventory.selected_item = self.player.inventory.val_list[i]
                                 
                             except KeyError:
+                                pass
+                            except IndexError:
                                 pass
             # update the screen
             pygame.display.update()

@@ -85,10 +85,6 @@ class Item:
         return Item(self.tag, self.name, self.image, self.stack_size, desc=self.desc)
     
     def update_dropped(self, dt):
-        
-        # if self.vel_y > 0:
-            
-        #     self.vel_y -= 0.1 * dt 
             
         self.vel_y = pygame.math.Vector2((0, self.vel_y)).move_towards((0,0), 0.15*dt).y
             
@@ -152,7 +148,7 @@ class Inventory:
         self.max_y = 400
         self.least_y = 300
         
-        self.item_positions = [(self.rect.center[0] - self.rect.width//2 + 47 +(50* i), self.least_y+20 ) for i in range(1, 7)]
+        self.item_positions = [(self.rect.center[0] - self.rect.width//2 + 93 +(50* i), self.least_y+20 ) for i in range(1, 7)]
         
         self.vel = 0
         
@@ -188,6 +184,9 @@ class Inventory:
     
     def render_dropped_items(self, dt, display, scroll):
         
+        if self.player.game.time == 100:
+            dt /= 4
+        
         for item in self.dropped_items:
             item.update_dropped(dt)
             item.render_dropped(display, scroll)
@@ -222,7 +221,7 @@ class Inventory:
 
     def add_item(self, item):
         
-        if len(self.items.keys()) < 10 or item.name in self.get_tag_list():
+        if len(self.items.keys()) < 4 or item.name in self.get_tag_list():
         
             if item.tag == 'powerup':
                 
@@ -349,58 +348,63 @@ class Inventory:
                 
                 self.key_list.append(item_list[0].name)
                 self.val_list.append(item_list[0])
-                
-                
-    def render(self, display, mouse_pos, dt=1, scroll=[0,0]):
+             
+    def highlight_selected(self, item, display, pos):
         
-        if display.get_rect().colliderect(self.rect):
+        if self.selected_item and item.name == self.selected_item.name:
+                
+                pygame.draw.circle(display, (255,255,255), (pos[0] + 15, pos[1] + 15), 20, 5)
+           
+    def render_item_image(self, item, display, pos):
+        display.fblits([(self.item_background_colors[item.tag], (pos))])
+        display.fblits([(item.image, (pos[0] , pos[1] ))])
+        
+    def render(self, display, mouse_pos, dt=1, scroll=[0,0]): 
+        
+        if not display.get_rect().colliderect(self.rect):
+            return 
             
-            pygame.draw.rect(display, (100,100,100), self.rect)
-            pygame.draw.rect(display, (0,0,0), self.rect, 5)
+        pygame.draw.rect(display, (100,100,100), self.rect)
+        pygame.draw.rect(display, (0,0,0), self.rect, 5)
+        
+        for x, itemkey in enumerate(self.key_list):
             
-            for x, itemkey in enumerate(self.key_list):
-                
-                
-                item_list = self.rendered_dict[itemkey]
-                
-                item_count = item_list[1]
-                
-                pos = [self.item_positions[x][0] , self.item_positions[x][1]  -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
+            item_list = self.rendered_dict[itemkey]
+            
+            item_count = item_list[1]
+            
+            pos = [self.item_positions[x][0] , self.item_positions[x][1]  -( self.max_y- self.rect.y - 90  if self.open else self.least_y - self.rect.y - 90)]
 
-                display.fblits([(self.item_background_colors[item_list[0].tag], (pos))])
-
-                display.fblits([(item_list[0].image, (pos[0] , pos[1] ))])
+            self.render_item_image(item_list[0], display, pos )
+            
+            text = self.writing.render(str(item_count), False, (255,255,255))
+            
+            text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
+            
+            display.fblits([(text, text_rect.topleft)]) if item_count > 1 else 0
                 
-                text = self.writing.render(str(item_count), False, (255,255,255))
+            self.highlight_selected(item_list[0], display, pos)
                 
-                text_rect = text.get_rect(bottomleft = item_list[0].image.get_rect(topleft=  pos).bottomleft)
+            col_rect = pygame.Rect(*pos, item_list[0].image.get_rect().width, item_list[0].image.get_rect().height)
+            
+            if col_rect.collidepoint(mouse_pos):
+                pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 95, item_list[0].text_surf.get_width() +8 , 70))
+                pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 25, 8, 25))
                 
-                display.fblits([(text, text_rect.topleft)]) if item_count > 1 else 0
+                display.fblits([(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))])
+                display.fblits([(item_list[0].name_img, (pos[0]+ 5, pos[1] - 90))])
                 
-                if self.selected_item and item_list[0].name == self.selected_item.name:
+                if pygame.mouse.get_pressed()[0] and not self.clicked:
                     
-                    pygame.draw.circle(display, (255,255,255), (pos[0] + 15, pos[1] + 15), 20, 5)
+                    self.selected_item = item_list[0] if self.selected_item != item_list[0] else None
                     
-                col_rect = pygame.Rect(*pos, item_list[0].image.get_rect().width, item_list[0].image.get_rect().height)
-                if col_rect.collidepoint(mouse_pos):
-
-                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 95, item_list[0].text_surf.get_width() +8 , 70))
-                    pygame.draw.rect(display, (30,30,30), pygame.Rect(pos[0], pos[1] - 25, 8, 25))
+                    self.clicked = True
                     
-                    display.fblits([(item_list[0].text_surf, (pos[0]+ 5, pos[1] - 70))])
-                    display.fblits([(item_list[0].name_img, (pos[0]+ 5, pos[1] - 90))])
-                    
-                    if pygame.mouse.get_pressed()[0] and not self.clicked:
+            # print(self.dropped_items)
                         
-                        self.selected_item = item_list[0] if self.selected_item != item_list[0] else None
-                        
-                        self.clicked = True
-                        
-                # print(self.dropped_items)
-                            
-                if not pygame.mouse.get_pressed()[0]:
-                    
-                    self.clicked = False
+            if not pygame.mouse.get_pressed()[0]:
+                
+                self.clicked = False
  
     def affect_player(self):
         
@@ -846,7 +850,7 @@ class Player:
 
         self.dx, self.dy = self.velocity.x, self.velocity.y
 
-        self.slow_velocity(0.05, dt)
+        self.slow_velocity(0.13, dt)
 
         self.update_anims()
 
