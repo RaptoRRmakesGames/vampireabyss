@@ -228,6 +228,20 @@ class Game:
 
         self.minimap.feed_hallways(self.dungeon.hallways)
         
+        # for weapon in list(weapons_dict.values()):
+            
+        #     if weapon.world_game_img_name == '':
+        #         return 
+            
+        #     weapon.trace_in_animation(self.player.animator.animations[weapon.carry_type].all_images(),[
+        #         (5,5),
+        #         (5,5),
+        #         (5,5),
+        #         (5,5),
+        #         (5,5),
+        #         (5,5),
+        #     ], True )
+        
         self.player.inventory.add_item(weapons_dict['axe'])
         self.player.inventory.add_item(weapons_dict['sicles'])
         self.player.inventory.add_item(weapons_dict['blades'])
@@ -237,8 +251,6 @@ class Game:
         self.player.inventory.add_item(item_dict['fang_extendors'])
         self.player.inventory.add_item(item_dict['stim'])
         self.player.inventory.add_item(item_dict['vial'])
-        
-        
         
         self.combat_system = CombatSystem(self)
         

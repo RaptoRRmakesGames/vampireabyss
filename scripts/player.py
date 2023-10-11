@@ -27,7 +27,7 @@ def outline(img):
 
 class Item:
     
-    def __init__(self, tag, name, img: pygame.Surface, stack_size=-1, desc = ''):
+    def __init__(self, tag, name, img: pygame.Surface, world_game_name='',carry_type='', stack_size=-1, desc = ''):
         
         self.tag = tag 
         self.name = name 
@@ -50,6 +50,12 @@ class Item:
         
         self.name_img = med_font.render(self.name, False, (0,100,255)).convert_alpha()
         self.name_img.set_colorkey((0,0,0))
+        
+        if world_game_name != '':
+        
+            world_game_image = pygame.image.load(f'assets/images/weapons/game_world_weapon_sprites/{world_game_name}.png')
+            self.world_game_img_name = world_game_name
+            self.world_image = world_game_image.convert_alpha()
 
         self.stack_size = stack_size
         
@@ -61,6 +67,17 @@ class Item:
         
         self.pickable = False
     
+    def trace_in_animation(self, image_list : [pygame.Surface, pygame.Surface], points : [(),()], save=False):
+        
+        for i, image in enumerate(image_list):
+            
+            image.blit(self.world_image, points[i])
+            
+            if not save:
+                return 
+            
+            pygame.image.save(image, f"{self.world_game_img_name}_{i}.png")
+            
     
     def set_inventory(self, inventory):
         
@@ -126,11 +143,13 @@ item_dict = {
     'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers yourlnbrhealth, But gives a speed boost'),
 }
 weapons_dict = {
-    'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(), desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
-    'sicles' : Item('weapon', "Devil's Sicles", pygame.image.load('assets/images/weapons/sicles.png').convert_alpha(), desc='These divine Sicles are sentlnbrstraight from Hells hottest level'),
-    'blades' : Item('weapon', "Zeus's Hidden Blades", pygame.image.load('assets/images/weapons/hidden_blade.png').convert_alpha(), desc='Handcrafted from Zeus himself,lnbrThese blades strike lighting fast and stun'),
-    'katana' : Item('weapon', "Fujin's Sword", pygame.image.load('assets/images/weapons/katana.png').convert_alpha(), desc='Created in Fujins finest forgery,lnbrThis Katana will slice flesh like its wind'),
+    'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(),world_game_name='', carry_type='' ,desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
+    'sicles' : Item('weapon', "Devil's Sicles", pygame.image.load('assets/images/weapons/sicles.png').convert_alpha(),world_game_name='', carry_type='' ,desc='These divine Sicles are sentlnbrstraight from Hells hottest level'),
+    'blades' : Item('weapon', "Zeus's Hidden Blades", pygame.image.load('assets/images/weapons/hidden_blade.png').convert_alpha(),world_game_name='hidden_blade', carry_type='single_hand' ,desc='Handcrafted from Zeus himself,lnbrThese blades strike lighting fast and stun'),
+    'katana' : Item('weapon', "Fujin's Sword", pygame.image.load('assets/images/weapons/katana.png').convert_alpha(),world_game_name='', carry_type='' ,desc='Created in Fujins finest forgery,lnbrThis Katana will slice flesh like its wind'),
 }
+
+
 
 class Inventory:
     
@@ -526,39 +545,25 @@ class Player:
         self.animator = Animator(
             
             {
-                'idle_up' : Animation(self.game.assets['player']['idle']['up'],), 
-                'idle_down' : Animation(self.game.assets['player']['idle']['down'],), 
-                'idle_left' : Animation(self.game.assets['player']['idle']['left'],), 
-                'idle_right' : Animation(self.game.assets['player']['idle']['right'],), 
+                'idle' : Animation(self.game.assets['player']['idle']['up'],), 
                 
+                'run' : Animation(self.game.assets['player']['run']['up'],), 
                 
-                'run_up' : Animation(self.game.assets['player']['run']['up'],), 
-                'run_down' : Animation(self.game.assets['player']['run']['down'],), 
-                'run_left' : Animation(self.game.assets['player']['run']['left'],), 
-                'run_right' : Animation(self.game.assets['player']['run']['right'],), 
+                'punch' : Animation(self.game.assets['player']['punch_left']['up'],30), 
                 
-                
-                'punch_up_left' : Animation(self.game.assets['player']['punch_left']['up'],30), 
-                'punch_down_left' : Animation(self.game.assets['player']['punch_left']['down'],30), 
-                'punch_left_left' : Animation(self.game.assets['player']['punch_left']['left'],30), 
-                'punch_right_left' : Animation(self.game.assets['player']['punch_left']['right'],30), 
-                
-                'punch_up_right' : Animation(self.game.assets['player']['punch_right']['up'],30), 
-                'punch_down_right' : Animation(self.game.assets['player']['punch_right']['down'],30), 
-                'punch_left_right' : Animation(self.game.assets['player']['punch_right']['left'],30), 
-                'punch_right_right' : Animation(self.game.assets['player']['punch_right']['right'],30), 
-                
-                'bigpunch_up_left' : Animation(self.game.assets['player']['big_punch_left']['up'],60), 
-                'bigpunch_down_left' : Animation(self.game.assets['player']['big_punch_left']['down'],60), 
-                'bigpunch_left_left' : Animation(self.game.assets['player']['big_punch_left']['left'],60), 
-                'bigpunch_right_left' : Animation(self.game.assets['player']['big_punch_left']['right'],60), 
-                
-                'bigpunch_up_right' : Animation(self.game.assets['player']['big_punch_right']['up'],60), 
-                'bigpunch_down_right' : Animation(self.game.assets['player']['big_punch_right']['down'],60), 
-                'bigpunch_left_right' : Animation(self.game.assets['player']['big_punch_right']['left'],60), 
-                'bigpunch_right_right' : Animation(self.game.assets['player']['big_punch_right']['right'],60), 
+                'bigpunch' : Animation(self.game.assets['player']['big_punch_left']['up'],60),
                 
             },'idle'+'_'+self.ori)
+        
+        self.animator.clone_in_4_dirs('idle')
+        self.animator.clone_in_4_dirs('run')
+        
+        self.animator.clone_in_4_dirs_and_flip('punch')
+        self.animator.clone_in_4_dirs_and_flip('bigpunch')
+        
+        print(self.animator.get_anim_names())
+        
+        self.animator.set_base_anim()
         
         self.dx, self.dy = 0,0
         self.last_attack_turn = 'left'
