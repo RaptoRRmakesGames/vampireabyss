@@ -494,39 +494,43 @@ class Inventory:
             
             base_player_damage += .4
             
-        if self.val_list[0].tag == 'weapon':
+        try:
             
-            carry_type = self.val_list[0].carry_type
-            
-            for ori in ['up', 'down', 'left', 'right']:
+            if self.val_list[0].tag == 'weapon':
                 
-                for dir in ['left', 'right']:
-                    
-                    
+                carry_type = self.val_list[0].carry_type
                 
-            
-                    string = carry_type + '_temp' +'_'+ori+'_'+dir
-                    self.val_list[0].trace_in_animation(
-                        self.player.animator.animations[string].images,
-                        [
-                            [0,0],
-                            [0,0],
-                            [0,0],
-                            [0,0],
-                            [0,0],
-                            [0,0],
-
-                        ], False
+                for ori in ['up', 'down', 'left', 'right']:
+                    
+                    for dir in ['left', 'right']:
                         
-                    )
-            
-            self.player.has_weapon = True 
-            self.player.weapon = self.val_list[0]
-            
-        else:
-            
-            self.player.has_weapon = False 
-            self.player.weapon = None
+                        
+                    
+                
+                        string = carry_type + '_temp' +'_'+ori+'_'+dir
+                        self.val_list[0].trace_in_animation(
+                            self.player.animator.animations[string].images,
+                            [
+                                [0,0],
+                                [0,0],
+                                [0,0],
+                                [0,0],
+                                [0,0],
+                                [0,0],
+
+                            ], False
+                            
+                        )
+                
+                self.player.has_weapon = True 
+                self.player.weapon = self.val_list[0]
+                
+            else:
+                
+                self.player.has_weapon = False 
+                self.player.weapon = None
+        except IndexError:
+            pass 
 
             
         self.player.max_hp = base_player_hp
