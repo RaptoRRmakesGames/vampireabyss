@@ -122,66 +122,14 @@ class Game:
             'bat' : load_images_from_folder(IMG_PATH+'main menu/bat',sizeup=3),
             
             
-            'weapons' : {
-                'axe': pygame.image.load(IMG_PATH+ 'weapons/axe.png'), 
-                'axe2': pygame.image.load(IMG_PATH+ 'weapons/axe.png'), 
-
-            },
-            
-            
             'player' : {
-                'idle' :{
-                    
-                    'up' : load_images_from_folder('assets/images/player/idle'),
-                    'down' : load_images_from_folder('assets/images/player/idle', 180),
-                    'left' : load_images_from_folder('assets/images/player/idle', 90),
-                    'right' : load_images_from_folder('assets/images/player/idle', -90),
-                    
-                    },
                 
-                'punch_left' :{
-                    
-                    'up' : load_images_from_folder('assets/images/player/punch', 0),
-                    'down' : load_images_from_folder('assets/images/player/punch', 180),
-                    'left' : load_images_from_folder('assets/images/player/punch', 90),
-                    'right' : load_images_from_folder('assets/images/player/punch', -90),
-                    
-                    },
+                'idle' : load_images_from_folder('assets/images/player/idle'),
+                'run' : load_images_from_folder('assets/images/player/run'),
+                'punch' : load_images_from_folder('assets/images/player/punch'),
+                'big_punch' : load_images_from_folder('assets/images/player/big_punch'),
+                'single_hand' : load_images_from_folder('assets/images/player/single_hand_weapon'),
                 
-                'punch_right' :{
-                    
-                    'up' : load_images_from_folder('assets/images/player/punch',0,True),
-                    'down' : load_images_from_folder('assets/images/player/punch', 180,True),
-                    'left' : load_images_from_folder('assets/images/player/punch', 90,True),
-                    'right' : load_images_from_folder('assets/images/player/punch', -90,True),
-                    
-                    },
-                
-                'big_punch_left' :{
-                    
-                    'up' : load_images_from_folder('assets/images/player/big_punch'),
-                    'down' : load_images_from_folder('assets/images/player/big_punch', 180),
-                    'left' : load_images_from_folder('assets/images/player/big_punch', 90),
-                    'right' : load_images_from_folder('assets/images/player/big_punch', -90),
-                    
-                    },
-                'big_punch_right' :{
-                    
-                    'up' : load_images_from_folder('assets/images/player/big_punch',0,True),
-                    'down' : load_images_from_folder('assets/images/player/big_punch', 180,True),
-                    'left' : load_images_from_folder('assets/images/player/big_punch', 90,True),
-                    'right' : load_images_from_folder('assets/images/player/big_punch', -90,True),
-                    
-                    },
-                
-                'run' :{
-                    
-                    'up' : load_images_from_folder('assets/images/player/run'),
-                    'down' : load_images_from_folder('assets/images/player/run', 180),
-                    'left' : load_images_from_folder('assets/images/player/run', 90),
-                    'right' : load_images_from_folder('assets/images/player/run', -90),
-                    
-                    },
                 
             }
         
@@ -242,15 +190,12 @@ class Game:
         #         (5,5),
         #     ], True )
         
-        self.player.inventory.add_item(weapons_dict['axe'])
-        self.player.inventory.add_item(weapons_dict['sicles'])
+        
+        
         self.player.inventory.add_item(weapons_dict['blades'])
-        self.player.inventory.add_item(weapons_dict['katana'])
         self.player.inventory.add_item(item_dict['compass'])
-        self.player.inventory.add_item(item_dict['spoon'])
-        self.player.inventory.add_item(item_dict['fang_extendors'])
-        self.player.inventory.add_item(item_dict['stim'])
-        self.player.inventory.add_item(item_dict['vial'])
+        
+        self.player.inventory.affect_player()
         
         self.combat_system = CombatSystem(self)
         

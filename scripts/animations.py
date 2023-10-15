@@ -24,11 +24,8 @@ class Animation:
         return self.images
     
     def return_self_turned(self,degrees) -> pygame.Surface:
-        
-        anim = Animation([pygame.transform.rotate(img, degrees) for img in self.images], self.frame_time)
-        
-            
-        return anim
+
+        return Animation([pygame.transform.rotate(img, degrees) for img in self.images], self.frame_time)
             
     def return_self_flipped(self, xbool, ybool) -> 'Animation' :
         

@@ -27,7 +27,7 @@ def outline(img):
 
 class Item:
     
-    def __init__(self, tag, name, img: pygame.Surface, world_game_name='',carry_type='', stack_size=-1, desc = ''):
+    def __init__(self, tag, name, img: pygame.Surface, world_game_name='',carry_type='single_hand', stack_size=-1, desc = ''):
         
         self.tag = tag 
         self.name = name 
@@ -52,10 +52,12 @@ class Item:
         self.name_img.set_colorkey((0,0,0))
         
         if world_game_name != '':
-        
-            world_game_image = pygame.image.load(f'assets/images/weapons/game_world_weapon_sprites/{world_game_name}.png')
+
+            world_game_image = pygame.image.load(f'assets/images/weapons/game_world_weapon_sprites/hidden_blade.png')
             self.world_game_img_name = world_game_name
+            self.carry_type = carry_type
             self.world_image = world_game_image.convert_alpha()
+
 
         self.stack_size = stack_size
         
@@ -67,17 +69,27 @@ class Item:
         
         self.pickable = False
     
-    def trace_in_animation(self, image_list : [pygame.Surface, pygame.Surface], points : [(),()], save=False):
+    def trace_in_animation(self, image_list : [pygame.Surface, pygame.Surface], points : [(),()], save=True):
+        
+        img_list = []
         
         for i, image in enumerate(image_list):
+            
+            img = pygame.Surface(image.get_size())
+            img.blit(image, (0,0))
+            img.blit(self.world_image, points[i])
+            
+            img_list.append(img)
             
             image.blit(self.world_image, points[i])
             
             if not save:
-                return 
+                return img_list
             
-            pygame.image.save(image, f"{self.world_game_img_name}_{i}.png")
+            pygame.image.save(image, f"assets/images/weapons/game_world_weapon_sprites/game_generated/{self.carry_type}_{self.world_game_img_name}_{i}.png")
             
+            
+        return 
     
     def set_inventory(self, inventory):
         
@@ -143,10 +155,10 @@ item_dict = {
     'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers yourlnbrhealth, But gives a speed boost'),
 }
 weapons_dict = {
-    'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(),world_game_name='', carry_type='' ,desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
-    'sicles' : Item('weapon', "Devil's Sicles", pygame.image.load('assets/images/weapons/sicles.png').convert_alpha(),world_game_name='', carry_type='' ,desc='These divine Sicles are sentlnbrstraight from Hells hottest level'),
-    'blades' : Item('weapon', "Zeus's Hidden Blades", pygame.image.load('assets/images/weapons/hidden_blade.png').convert_alpha(),world_game_name='hidden_blade', carry_type='single_hand' ,desc='Handcrafted from Zeus himself,lnbrThese blades strike lighting fast and stun'),
-    'katana' : Item('weapon', "Fujin's Sword", pygame.image.load('assets/images/weapons/katana.png').convert_alpha(),world_game_name='', carry_type='' ,desc='Created in Fujins finest forgery,lnbrThis Katana will slice flesh like its wind'),
+    'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(),world_game_name='', carry_type='single_hand' ,desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
+    'sicles' : Item('weapon', "Devil's Sicles", pygame.image.load('assets/images/weapons/sicles.png').convert_alpha(),world_game_name='', carry_type='single_hand' ,desc='These divine Sicles are sentlnbrstraight from Hells hottest level'),
+    'blades' : Item('weapon', "Zeus's Hidden Blades", pygame.image.load('assets/images/weapons/hidden_blade.png').convert_alpha(),world_game_name='hidden_blade', carry_type='single_hand' ,desc='Handcrafted from Zeus himself,lnbrThese blades strike lighting fast and stun', stack_size=-1),
+    'katana' : Item('weapon', "Fujin's Sword", pygame.image.load('assets/images/weapons/katana.png').convert_alpha(),world_game_name='', carry_type='single_hand' ,desc='Created in Fujins finest forgery,lnbrThis Katana will slice flesh like its wind'),
 }
 
 
@@ -481,6 +493,40 @@ class Inventory:
         if "Fujin's Sword" in item_name_list:
             
             base_player_damage += .4
+            
+        if self.val_list[0].tag == 'weapon':
+            
+            carry_type = self.val_list[0].carry_type
+            
+            for ori in ['up', 'down', 'left', 'right']:
+                
+                for dir in ['left', 'right']:
+                    
+                    
+                
+            
+                    string = carry_type + '_temp' +'_'+ori+'_'+dir
+                    self.val_list[0].trace_in_animation(
+                        self.player.animator.animations[string].images,
+                        [
+                            [0,0],
+                            [0,0],
+                            [0,0],
+                            [0,0],
+                            [0,0],
+                            [0,0],
+
+                        ], False
+                        
+                    )
+            
+            self.player.has_weapon = True 
+            self.player.weapon = self.val_list[0]
+            
+        else:
+            
+            self.player.has_weapon = False 
+            self.player.weapon = None
 
             
         self.player.max_hp = base_player_hp
@@ -505,6 +551,9 @@ class Player:
         self.last_ori = 'up'
         self.ori = 'up'
         self.state = 'regular'
+        
+        self.has_weapon = False
+        self.weapon = None
         
         self.rect.center = pos
         
@@ -545,13 +594,16 @@ class Player:
         self.animator = Animator(
             
             {
-                'idle' : Animation(self.game.assets['player']['idle']['up'],), 
+                'idle' : Animation(self.game.assets['player']['idle'],), 
                 
-                'run' : Animation(self.game.assets['player']['run']['up'],), 
+                'run' : Animation(self.game.assets['player']['run'],), 
                 
-                'punch' : Animation(self.game.assets['player']['punch_left']['up'],30), 
+                'punch' : Animation(self.game.assets['player']['punch'],30), 
                 
-                'bigpunch' : Animation(self.game.assets['player']['big_punch_left']['up'],60),
+                'bigpunch' : Animation(self.game.assets['player']['big_punch'],60),
+                
+                'single_hand_temp' : Animation(self.game.assets['player']['single_hand'],160),
+                
                 
             },'idle'+'_'+self.ori)
         
@@ -560,8 +612,7 @@ class Player:
         
         self.animator.clone_in_4_dirs_and_flip('punch')
         self.animator.clone_in_4_dirs_and_flip('bigpunch')
-        
-        print(self.animator.get_anim_names())
+        self.animator.clone_in_4_dirs_and_flip('single_hand_temp')
         
         self.animator.set_base_anim()
         
@@ -874,108 +925,74 @@ class Player:
         self.rect.x += self.dx * dt
         self.rect.y += self.dy * dt
 
+    def attack(self, type, anim_name, damage_multi = 1, interval_plus = 0):
+        
+        now_attack = 'right' if self.last_attack_turn == 'left' else 'left'
+                    
+        self.can_attack = False
+        
+        self.last_attack_type = type
+        
+        if self.weapon == None:
+        
+            self.animator.set_anim(f'{anim_name}_'+self.ori+'_'+now_attack)
+        else:
+            
+            self.animator.set_anim(self.weapon.carry_type+'_temp_'+self.ori+'_'+now_attack)
+        
+        self.last_attack_turn = now_attack
+        
+        match self.ori: 
+            
+            case 'up':
+                top = self.rect.y - 32  - self.big_spoon_buff
+                left = self.rect.x - 11
+                width_height = (32 + 14,32 + self.big_spoon_buff)
+                
+            case 'down':
+                top = self.rect.y + self.rect.width #+ self.big_spoon_buff
+                left = self.rect.x - 11
+                width_height = (32 + 14,32 + self.big_spoon_buff)
+            
+                
+            case 'left':
+                top = self.rect.y - 11
+                left = self.rect.x - 32
+                width_height = (32 + self.big_spoon_buff,32 + 14)
+                
+            case 'right':
+                top = self.rect.y - 11
+                left = self.rect.x + self.rect.width 
+                width_height = (32 + self.big_spoon_buff,32 + 14)
+        
+        self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage'] * damage_multi),)
+        
+        self.attacking = True
+        
+        self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval + interval_plus
+    
     def update_combat(self):
         keys = pygame.key.get_pressed()
         
-        now_attack = 'right' if self.last_attack_turn == 'left' else 'left'
-        if not self.inventory.open:
-            if keys[pygame.K_LCTRL] and self.can_attack:
-                self.can_attack = False
-                
-                self.last_attack_type = 'big'
-                
-                self.animator.set_anim('bigpunch_'+self.ori+'_'+now_attack)
-                self.last_attack_turn = now_attack
-                
-                match self.ori: 
-                    
-                    case 'up':
-                        top = self.rect.y - 32 - 15 - self.big_spoon_buff
-                        left = self.rect.x - 7
-                        width_height = (32 + 14,32 + self.big_spoon_buff)
-                        
-                    case 'down':
-                        top = self.rect.y + self.rect.width #+ self.big_spoon_buff
-                        left = self.rect.x - 7 
-                        width_height = (32 + 14,32 + self.big_spoon_buff)
-                    
-                        
-                    case 'left':
-                        top = self.rect.y - 7
-                        left = self.rect.x - 32
-                        width_height = (32 + self.big_spoon_buff,32 + 14)
-                        
-                    case 'right':
-                        top = self.rect.y - 7
-                        left = self.rect.x + self.rect.width 
-                        width_height = (32 + self.big_spoon_buff,32 + 14)
-
-
-                self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage'] *1.5))
-                
-                self.attacking = True
-                
-                self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval + 150
-            
-            if keys[pygame.K_SPACE] and self.can_attack:
-                
-                self.last_attack_type = 'small'
-                
-                self.can_attack = False
-                
-                self.animator.set_anim('punch'+'_'+self.ori+'_'+now_attack)
-                self.last_attack_turn = now_attack
-                
-                match self.ori: 
-                    
-                    case 'up':
-                        top = self.rect.y - 32 - self.big_spoon_buff
-                        left = self.rect.x - 10
-                        width_height = (32 + 14,32 + self.big_spoon_buff)
-                        
-                    case 'down':
-                        top = self.rect.y + self.rect.width #+ self.big_spoon_buff
-                        left = self.rect.x - 10
-                        width_height = (32 + 14,32 + self.big_spoon_buff)
-                    
-                        
-                    case 'left':
-                        top = self.rect.y - 10 
-                        left = self.rect.x - 32 - self.big_spoon_buff
-                        width_height = (32 + self.big_spoon_buff,32 + 14)
-                        
-                    case 'right':
-                        top = self.rect.y - 10
-                        left = self.rect.x + self.rect.width 
-                        width_height = (32 + self.big_spoon_buff,32 + 14)
-
-                self.hitboxes.append(Hitbox((left, top , *width_height, ), self.ori, self.damage * self.powers['damage']))
+        # now_attack = 'right' if self.last_attack_turn == 'left' else 'left'
         
-                self.attacking = True
-                
-                self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval
-                
-                
-            if pygame.time.get_ticks() > self.stop_attack_time and self.attacking:
-                
-                self.attacking = False
-                
-                self.hitboxes = []
-                
-                if self.last_attack_type == 'big':
-                
-                    self.next_attack = pygame.time.get_ticks() + self.attack_interval + 150
-                    
-                else:
-                    self.next_attack = pygame.time.get_ticks() + self.attack_interval
-                
-            if pygame.time.get_ticks() > self.next_attack and not self.can_attack and not self.attacking:
-                
-                self.can_attack = True
-        else:
+        if pygame.time.get_ticks() > self.stop_attack_time and self.attacking:
+            
+            self.attacking = False
             
             self.hitboxes = []
             
+            if self.last_attack_type == 'big':
+            
+                self.next_attack = pygame.time.get_ticks() + self.attack_interval + 150
+                
+            else:
+                self.next_attack = pygame.time.get_ticks() + self.attack_interval
+            
+        if pygame.time.get_ticks() > self.next_attack and not self.can_attack and not self.attacking:
+            
+            self.can_attack = True
+
         for hitbox in self.hitboxes:
             
             if hitbox.die_time != 'stayforever':
@@ -985,6 +1002,24 @@ class Player:
                 if hitbox.be_removed:
                     
                     self.hitboxes.remove(hitbox)
+        
+        if self.inventory.open:
+                
+            self.hitboxes = []
+            return
+            
+        if not self.can_attack:
+            return
+            
+        if keys[pygame.K_LCTRL]:
+            
+            self.attack('big', 'bigpunch', 1.5, 150)
+        
+        elif keys[pygame.K_SPACE]:
+            
+            self.attack('big', 'punch' )
+            
+            
                
     def render(self, display, offset, nocap=True):
         self.render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
@@ -998,9 +1033,9 @@ class Player:
             
             # pygame.draw.circle(display, (255,255,255), self.pos + pygame.math.Vector2(400 + 29,300 - 57), 16)
             
-            # for box in self.hitboxes:
+            for box in self.hitboxes:
                 
-            #     box.render(display, offset)
+                box.render(display, offset)
      
     def set_pos(self, pos):
         

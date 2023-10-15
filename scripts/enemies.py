@@ -106,7 +106,7 @@ class Enemy:
         
     def update(self, player,dt):
         self.dx,self.dy = 0,0
-        self.cap_velocity(6)
+        # self.cap_velocity(6)
         if not self.dead:
             self.dx += self.vel[0]
             self.dy += self.vel[1]
@@ -122,7 +122,7 @@ class Enemy:
                     self.dx += self.vel2.x 
                     self.dy += self.vel2.y
             
-            self.vel = list(pygame.math.Vector2(self.vel).move_towards((0,0), 1))
+            self.vel = list(pygame.math.Vector2(self.vel).move_towards((0,0), 1 * dt))
 
         
         if self.health <= 0 and not self.dead:

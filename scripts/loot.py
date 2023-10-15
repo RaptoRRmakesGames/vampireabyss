@@ -7,11 +7,10 @@ from scripts.settings import *
 from scripts.player import item_dict
 from scripts.font_inits import *
 
-powerups = ['idk what this does']
 class Chest:
     
     def __init__(self, room):
-        self.contents = [choice([powerups])]
+        
         self.room = room
         self.width, self.height = 75, 50
         self.rect = pygame.FRect(self.room.rect.center[0] - self.width, self.room.rect.center[1] - self.height, self.width, self.height)
@@ -75,7 +74,6 @@ class PowerUpBase:
     def __init__(self, color, chest):
         self.to_be_removed = False
         self.color = color
-        self.type = type 
         self.chest = chest 
         
         self.just_spawned = True
@@ -92,7 +90,7 @@ class PowerUpBase:
         
     def update(self, dt):
         
-        self.velocity = self.velocity.move_towards((0,0), 0.01)
+        self.velocity = self.velocity.move_towards((0,0), 0.05 * dt)
         
         self.rect.y += self.velocity.y * dt
         
