@@ -67,7 +67,6 @@ def outline(img):
         new_display.set_at(pixel, (255, 255, 255))
     
     return new_display
-
 class Game:
     
     def save_all_data(self):
@@ -128,7 +127,7 @@ class Game:
                 'run' : load_images_from_folder('assets/images/player/run'),
                 'punch' : load_images_from_folder('assets/images/player/punch'),
                 'big_punch' : load_images_from_folder('assets/images/player/big_punch'),
-                'single_hand' : load_images_from_folder('assets/images/player/single_hand_weapon'),
+                'single_hand' : load_images_from_folder('assets/images/player/single_hand_weapon',),
                 
                 
             }
@@ -175,22 +174,6 @@ class Game:
         self.minimap.feed_rooms(self.dungeon.get_room_list())
 
         self.minimap.feed_hallways(self.dungeon.hallways)
-        
-        # for weapon in list(weapons_dict.values()):
-            
-        #     if weapon.world_game_img_name == '':
-        #         return 
-            
-        #     weapon.trace_in_animation(self.player.animator.animations[weapon.carry_type].all_images(),[
-        #         (5,5),
-        #         (5,5),
-        #         (5,5),
-        #         (5,5),
-        #         (5,5),
-        #         (5,5),
-        #     ], True )
-        
-        
         
         self.player.inventory.add_item(weapons_dict['blades'])
         self.player.inventory.add_item(item_dict['compass'])

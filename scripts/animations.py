@@ -77,8 +77,7 @@ class Animator:
         self.animations[anim_name + '_down_' +'right'] = Animation(animation.return_self_turned(180).return_self_flipped(True, False).images, animation.frame_time)
         self.animations[anim_name + '_left_' +'right'] = Animation(animation.return_self_turned(90).return_self_flipped(False, True).images, animation.frame_time)
         self.animations[anim_name + '_right_' +'right'] = Animation(animation.return_self_turned(-90).return_self_flipped(False, True).images, animation.frame_time)
-        
-        del self.animations[anim_name]
+
         
     def get_anim_names(self) -> list:
         
@@ -92,8 +91,6 @@ class Animator:
         self.animations[anim_name + '_down'] = Animation(animation.return_self_turned(180).images, animation.frame_time)
         self.animations[anim_name + '_left'] = Animation(animation.return_self_turned(90).images, animation.frame_time)
         self.animations[anim_name + '_right'] = Animation(animation.return_self_turned(-90).images, animation.frame_time)
-        
-        del self.animations[anim_name]
         
     def get_image(self) -> pygame.Surface:
         

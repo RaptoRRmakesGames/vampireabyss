@@ -1,5 +1,6 @@
 
 import pygame 
+from pygame.time import get_ticks as tn
 from random import randint, choice
 
 from scripts.combat_manager import Hitbox
@@ -7,6 +8,8 @@ from scripts.combat_manager import Hitbox
 from scripts.settings import coin_multi
 from scripts.animations import Animation, Animator
 from scripts.font_inits import *
+
+
 
 def outline(img):
     mask = pygame.mask.from_surface(img)
@@ -75,21 +78,21 @@ class Item:
         
         for i, image in enumerate(image_list):
             
-            img = pygame.Surface(image.get_size())
+            img = pygame.Surface((image.get_width() , image.get_height())).convert_alpha()
             img.blit(image, (0,0))
             img.blit(self.world_image, points[i])
+            img.set_colorkey((0,0,0))
             
             img_list.append(img)
             
             image.blit(self.world_image, points[i])
             
-            if not save:
-                return img_list
-            
-            pygame.image.save(image, f"assets/images/weapons/game_world_weapon_sprites/game_generated/{self.carry_type}_{self.world_game_img_name}_{i}.png")
             
             
-        return 
+            # pygame.image.save(image, f"assets/images/weapons/game_world_weapon_sprites/game_generated/{self.carry_type}_{self.world_game_img_name}_{i}.png")
+            
+            
+        return img_list
     
     def set_inventory(self, inventory):
         
@@ -154,6 +157,7 @@ item_dict = {
     'fang_extendors' : Item('util', 'Fang Extendors', pygame.image.load('assets/images/icons/fang_extendors.png').convert_alpha(), desc='Suck your enemies blood lnbrIn order to heal yourself'),
     'stim' : Item('util', 'Stim Pack', pygame.image.load('assets/images/icons/stim.png').convert_alpha(), desc='Injecting severely lowers yourlnbrhealth, But gives a speed boost'),
 }
+
 weapons_dict = {
     'axe' : Item('weapon', 'Frozen Axe', pygame.image.load('assets/images/weapons/axe.png').convert_alpha(),world_game_name='', carry_type='single_hand' ,desc='Mythical Axe from the Norse era.lnbrFreezes enemies and is throwable'),
     'sicles' : Item('weapon', "Devil's Sicles", pygame.image.load('assets/images/weapons/sicles.png').convert_alpha(),world_game_name='', carry_type='single_hand' ,desc='These divine Sicles are sentlnbrstraight from Hells hottest level'),
@@ -499,29 +503,29 @@ class Inventory:
             if self.val_list[0].tag == 'weapon':
                 
                 carry_type = self.val_list[0].carry_type
+                string = carry_type + '_temp'
                 
-                for ori in ['up', 'down', 'left', 'right']:
-                    
-                    for dir in ['left', 'right']:
-                        
-                        
-                    
+                match carry_type:
                 
-                        string = carry_type + '_temp' +'_'+ori+'_'+dir
-                        self.val_list[0].trace_in_animation(
-                            self.player.animator.animations[string].images,
+                    case 'single_hand':
+                        
+                        imgs = self.val_list[0].trace_in_animation(
+                            self.player.animator.animations[string].all_images(),
                             [
-                                [0,0],
-                                [0,0],
-                                [0,0],
-                                [0,0],
-                                [0,0],
-                                [0,0],
-
-                            ], False
+                                [4,0],
+                                [4,-1],
+                                [5,-3],
+                                [6,-3],
+                                [4,0],
+                            ], True
+                            
                             
                         )
-                
+                        
+                        # self.player.animator.animations[string].images = imgs
+                        
+                        self.player.animator.clone_in_4_dirs_and_flip(string)                        
+
                 self.player.has_weapon = True 
                 self.player.weapon = self.val_list[0]
                 
@@ -580,10 +584,10 @@ class Player:
         self.max_hp = 3
         
         self.stop_interval = 50
-        self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval
+        self.stop_attack_time = tn() + self.stop_interval
     
         self.attack_interval = 250
-        self.next_attack = pygame.time.get_ticks() + self.attack_interval
+        self.next_attack = tn() + self.attack_interval
         
         self.go_left = range(-45,45)
         self.go_right = list(range(135,180)) +  list(range(-180,-135))
@@ -606,7 +610,7 @@ class Player:
                 
                 'bigpunch' : Animation(self.game.assets['player']['big_punch'],60),
                 
-                'single_hand_temp' : Animation(self.game.assets['player']['single_hand'],160),
+                'single_hand_temp' : Animation(self.game.assets['player']['single_hand'],45),
                 
                 
             },'idle'+'_'+self.ori)
@@ -616,9 +620,10 @@ class Player:
         
         self.animator.clone_in_4_dirs_and_flip('punch')
         self.animator.clone_in_4_dirs_and_flip('bigpunch')
-        self.animator.clone_in_4_dirs_and_flip('single_hand_temp')
         
         self.animator.set_base_anim()
+        
+        self.dont_interupt_anim_names = ['punch', 'bigpunch', 'single']
         
         self.dx, self.dy = 0,0
         self.last_attack_turn = 'left'
@@ -629,10 +634,19 @@ class Player:
         self.can_dash = True
         self.dash = False
         self.stop_dash_time = 50
-        self.next_stop_dash = pygame.time.get_ticks() + self.stop_dash_time
+        self.next_stop_dash = tn() + self.stop_dash_time
         
         self.dash_timer = 2000
-        self.time_till_next_dash = pygame.time.get_ticks() + self.dash_timer
+        self.time_till_next_dash = tn() + self.dash_timer
+        
+        self.doing_special_attack = False
+        
+        self.lightings = 0
+        self.can_click = True
+        self.next_click = 0
+        
+        self.slow_down_time = False
+        self.lighting_pos = []
         
     def dashing(self):
         
@@ -641,19 +655,19 @@ class Player:
         if k[pygame.K_LSHIFT] and self.can_dash and not self.dash:
             
             self.dash = True 
-            self.next_stop_dash = pygame.time.get_ticks() + self.stop_dash_time
+            self.next_stop_dash = tn() + self.stop_dash_time
             self.can_dash = False
             
         if self.dash:
             
-            if pygame.time.get_ticks() > self.next_stop_dash:
+            if tn() > self.next_stop_dash:
                 self.dash = False
-                self.time_till_next_dash = pygame.time.get_ticks() + self.dash_timer
+                self.time_till_next_dash = tn() + self.dash_timer
             else:
                 
-                self.hitboxes.append(Hitbox(self.rect, self.ori, 1, 1 ))
+                self.hitboxes.append(Hitbox(self.rect, self.ori, 1, 1, ['no_kb']))
 
-        if pygame.time.get_ticks() > self.time_till_next_dash and not self.can_dash and not k[pygame.K_LSHIFT]:
+        if tn() > self.time_till_next_dash and not self.can_dash and not k[pygame.K_LSHIFT]:
             
             self.can_dash = True
             
@@ -871,7 +885,7 @@ class Player:
         
         self.animator.update_animations()
         
-        if self.animator.anim_name.split('_')[0] == 'punch' or self.animator.anim_name.split('_')[0] == 'bigpunch':
+        if self.animator.anim_name.split('_')[0] in self.dont_interupt_anim_names:
             if self.animator.anim.done:
                 
                 self.animator.set_anim('idle'+'_'+self.ori)
@@ -888,8 +902,27 @@ class Player:
         
         self.image = self.animator.get_image()
     
+    def handle_time_shift(self):
+        if self.slow_down_time:
+            
+            if round(self.game.time) != 25:
+                
+                self.game.time -= 5 * dt
+            else:
+                self.game.time = 25
+          
+        else:
+            if round(self.game.time) != 100:
+                self.game.time += 5 * dt
+                
+            else:
+                self.game.time = 100
+        
+    
     def update(self, scroll, dt):
         k = pygame.key.get_pressed()
+        
+        self.handle_time_shift()
 
         # Create a Vector2 instance for velocity
         velocity_change = pygame.math.Vector2(
@@ -923,8 +956,6 @@ class Player:
         self.render_rect = pygame.FRect(self.rect.x - 0, self.rect.y - 0, self.rect.width, self.rect.height)
 
     def apply_movement(self, dt):
-        
-        
         # self.normalise_speed()
         self.rect.x += self.dx * dt
         self.rect.y += self.dy * dt
@@ -973,29 +1004,23 @@ class Player:
         
         self.attacking = True
         
-        self.stop_attack_time = pygame.time.get_ticks() + self.stop_interval + interval_plus
+        self.stop_attack_time = tn() + self.stop_interval + interval_plus
+        
+    def can_select_pos(self):
+        
+        if self.can_click and pygame.mouse.get_pressed()[0]:
+            self.can_click = False 
+            self.next_click = tn() + 100
+            
+            return True 
+        time_now = tn()
+        if time_now > self.next_click and not pygame.mouse.get_pressed()[0]:
+            self.can_click = True 
+            
+        return False
     
-    def update_combat(self):
-        keys = pygame.key.get_pressed()
-        
-        # now_attack = 'right' if self.last_attack_turn == 'left' else 'left'
-        
-        if pygame.time.get_ticks() > self.stop_attack_time and self.attacking:
-            
-            self.attacking = False
-            
-            self.hitboxes = []
-            
-            if self.last_attack_type == 'big':
-            
-                self.next_attack = pygame.time.get_ticks() + self.attack_interval + 150
-                
-            else:
-                self.next_attack = pygame.time.get_ticks() + self.attack_interval
-            
-        if pygame.time.get_ticks() > self.next_attack and not self.can_attack and not self.attacking:
-            
-            self.can_attack = True
+    def update_attacks(self):
+
 
         for hitbox in self.hitboxes:
             
@@ -1006,6 +1031,71 @@ class Player:
                 if hitbox.be_removed:
                     
                     self.hitboxes.remove(hitbox)
+                    
+        
+        if not self.has_weapon or not self.doing_special_attack:
+                
+            if tn() > self.stop_attack_time and self.attacking:
+                
+                self.attacking = False
+                
+                self.hitboxes = []
+                
+                if self.last_attack_type == 'big':
+                
+                    self.next_attack = tn() + self.attack_interval + 150
+                    
+                else:
+                    self.next_attack = tn() + self.attack_interval
+                
+            if tn() > self.next_attack and not self.can_attack and not self.attacking:
+                
+                self.can_attack = True
+                
+            return 
+        
+        
+        
+        match self.weapon.name:
+            
+            case "Zeus's Hidden Blades":
+                
+                if self.doing_special_attack and self.lightings > 0:
+                    
+                    if self.can_select_pos():
+                    
+                        self.lighting_pos.append(self.mouse_pos)
+                        
+                        self.lightings -= 1
+                
+                    
+                if self.lightings == 0 and self.doing_special_attack:
+                    
+                    self.do_lighting_attack()
+                    
+                    self.next_attack = tn() + self.attack_interval + 15000
+                    self.doing_special_attack = False
+                    
+                
+                    
+                    
+                
+                
+    def do_lighting_attack(self):
+        
+        [self.hitboxes.append(Hitbox(pygame.Rect(*pos, 32,32), 'up', 5, 100)) for pos in self.lighting_pos]
+        
+        self.slow_down_time = False
+        
+        self.lighting_pos = []
+        
+    
+    def update_combat(self):
+        keys = pygame.key.get_pressed()
+        
+        # now_attack = 'right' if self.last_attack_turn == 'left' else 'left'
+        
+        self.update_attacks()
         
         if self.inventory.open:
                 
@@ -1017,14 +1107,33 @@ class Player:
             
         if keys[pygame.K_LCTRL]:
             
-            self.attack('big', 'bigpunch', 1.5, 150)
+            if not self.has_weapon:
+            
+                self.attack('big', 'bigpunch', 1.5, 150)
+                return 
+            
+            if not self.can_attack:
+                
+                return 
+                
+            match self.weapon.name :
+                
+                case "Zeus's Hidden Blades":
+                    
+                    self.select_lighting_mode = True
+                    self.attacking = True
+                    self.stop_attack_time = tn() + self.stop_interval + 5000
+                    self.lightings = 3
+                    self.lighting_pos = []
+                    self.slow_down_time = True
+                    self.doing_special_attack = True
+                    self.can_attack = False
+                    self.last_attack_type = 'big'
         
         elif keys[pygame.K_SPACE]:
             
             self.attack('big', 'punch' )
-            
-            
-               
+    
     def render(self, display, offset, nocap=True):
         self.render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
 
@@ -1037,8 +1146,10 @@ class Player:
             
             # pygame.draw.circle(display, (255,255,255), self.pos + pygame.math.Vector2(400 + 29,300 - 57), 16)
             
+            [pygame.draw.rect(display, (255,255,255), pygame.Rect(pos[0] - offset[0], pos[1] - offset[1], 32,32)) for pos in self.lighting_pos]
+            
             for box in self.hitboxes:
-                
+          
                 box.render(display, offset)
      
     def set_pos(self, pos):

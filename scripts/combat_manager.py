@@ -4,13 +4,15 @@ from random import randint
 
 class Hitbox:
     
-    def __init__(self, rect_values, ori, damage, time_to_be_removed=False):
+    def __init__(self, rect_values, ori, damage, time_to_be_removed=False, special_tags = []):
         
         self.rect = pygame.FRect(*rect_values)
         
         self.ori = ori
         
         self.damage = damage
+        
+        self.tags = special_tags
         
         self.hit_sprites = []
         
@@ -65,7 +67,8 @@ class CombatSystem:
                             vel = (knock_back_strenght,knock_back_sideoff)
 
                             
-                    enemy.setForce(vel)
+                    if not 'no_kb' in hitbox.tags:
+                        enemy.setForce(vel)
                             
                     hitbox.hit_sprites.append(enemy)
 
