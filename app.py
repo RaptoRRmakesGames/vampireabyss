@@ -67,6 +67,7 @@ def outline(img):
         new_display.set_at(pixel, (255, 255, 255))
     
     return new_display
+
 class Game:
     
     def save_all_data(self):
@@ -149,7 +150,6 @@ class Game:
         self.fps_cap = 1000
         self.time = 100
         
-        
         self.load_assets()
         
         self.state = 'start_room' if not debug else 'game'
@@ -163,7 +163,6 @@ class Game:
             (0,255,0),
             (0,0,255),
         ]
-
         
         self.start_room = Start_Room()
         
@@ -324,13 +323,9 @@ class Game:
         self.time_from_start = time()
         self.state = 'game' 
         self.started_game = True
-        
-        # print('ha')
-        
+ 
     def goto_settings(self):
-        
-        self.old_state = self.state
-        
+
         self.state = 'settings'
         
     def settings(self):
@@ -513,93 +508,97 @@ class Game:
         mx, my = pygame.mouse.get_pos()
         
         self.mouse_pos = [mx, my]
+        
+        match self.state:
+            
+            case 'game':
+                self.display.fill(self.game_color) 
+        
+                self._move_sprites()
+                
+                self._update_sprites()
+                
+                self._collisions()
+                
+                self.update_camera()
+                
+                self._render_sprites()
+                
+                self.player.render(self.display, self.scroll, False)
+                if self.do_lighting:
+                    self._lighting()
 
-        if self.state == 'game':
-            
-            self.display.fill(self.game_color) 
-    
-            self._move_sprites()
-            
-            self._update_sprites()
-            
-            self._collisions()
-            
-            self.update_camera()
-            
-            self._render_sprites()
-            
-            self.player.render(self.display, self.scroll, False)
-            if self.do_lighting:
-                self._lighting()
+                self.update_ui()
+                
+            case 'start_room':
+                
+                self.display.fill(self.game_color)
+                
+                self.update_camera()
+                
+                self.player.inventory.update(self.dt)
 
-            self.update_ui()
-            
-        if self.state == 'start_room':
-            self.display.fill(self.game_color)
-            
-            self.update_camera()
-              
-            self.player.inventory.update(self.dt)
-            
-            
-            self.player.update(self.scroll, self.dt)
-            
-            if self.player.rect.left + self.player.dx < 310:
+                self.player.update(self.scroll, self.dt)
                 
-                self.player.rect.left = 310 
-                self.player.dx = 0
-                self.player.velocity.x = 0
-            
-            if self.player.rect.right + self.player.dx > 768:
                 
-                self.player.rect.right = 768 
-                self.player.dx = 0
-                self.player.velocity.x = 0
+                if self.player.rect.left + self.player.dx < 310:
+                    
+                    self.player.rect.left = 310 
+                    self.player.dx = 0
+                    self.player.velocity.x = 0
                 
-            if self.player.rect.top + self.player.dy < 312:
+                if self.player.rect.right + self.player.dx > 768:
+                    
+                    self.player.rect.right = 768 
+                    self.player.dx = 0
+                    self.player.velocity.x = 0
+                    
+                if self.player.rect.top + self.player.dy < 312:
+                    
+                    self.player.rect.top = 312 
+                    self.player.dy = 0 
+                    self.player.velocity.y = 0
+                    
+                if self.player.rect.bottom + self.player.dy > 740:
+                    
+                    self.dungeon = self.dungeon.copy()
+                    self.minimap.feed_rooms(self.dungeon.get_room_list())
+                    self.minimap.feed_hallways(self.dungeon.hallways)
+                    self.player.set_pos(self.dungeon.middle_room_pos)
+                    
+                    self.time_from_start = time()
+                    
+                    self.state = 'game'
                 
-                self.player.rect.top = 312 
-                self.player.dy = 0 
-                self.player.velocity.y = 0
                 
-            if self.player.rect.bottom + self.player.dy > 740:
+                self.player.apply_movement(self.dt)
                 
-                self.dungeon = self.dungeon.copy()
-                self.minimap.feed_rooms(self.dungeon.get_room_list())
-                self.minimap.feed_hallways(self.dungeon.hallways)
-                self.player.set_pos(self.dungeon.middle_room_pos)
+                self.start_room.render(self.display, self.scroll)
+                self.player.render(self.display, self.scroll, True)
+                self.player.inventory.render_dropped_items(self.dt, self.display, self.scroll)
                 
-                self.time_from_start = time()
                 
-                self.state = 'game'
+                if self.do_lighting:
+                    self._lighting()
+                
+                self.player.inventory.render(self.display, self.mouse_pos)
+                
+                self.update_ui()
+
+            case 'menu':
             
+                self.display.fill(self.main_menu_color)
+
+                
+                self.main_menu()
             
-            self.player.apply_movement(self.dt)
-            
-            self.start_room.render(self.display, self.scroll)
-            self.player.render(self.display, self.scroll, True)
-            self.player.inventory.render_dropped_items(self.dt, self.display, self.scroll)
-            
-            
-            if self.do_lighting:
-                self._lighting()
-            
-            self.player.inventory.render(self.display, self.mouse_pos)
-            
-            self.update_ui()
-            
-            
-        elif self.state == 'menu' :
-            self.display.fill(self.main_menu_color)
+            case 'settings':
 
             
-            self.main_menu()
-            
-        elif self.state == 'settings':
-            self.display.fill(self.main_menu_color)
-            
-            self.settings()
-            
+                self.display.fill(self.main_menu_color)
+                
+                self.settings()
+                
         self.draw_cursor()
 
         self.scroll_speed = 55 / self.player.powers['speed']
@@ -607,19 +606,22 @@ class Game:
     def update_camera(self):
         # calculate the camera's target
         
-        if self.state == 'game':
-        
-            if not self.player.current_room.locked:
-                target_x = self.player.rect.centerx - self.display.get_width() / 2
-                target_y = self.player.rect.centery- self.display.get_height() / 2
-            else:
-                target_x = self.player.current_room.rect.centerx  - self.display.get_width() / 2
-                target_y = self.player.current_room.rect.centery  - self.display.get_height() / 2
-                
-        elif self.state == 'start_room':
-            target_x = self.start_room.rect.centerx - self.display.get_width() / 2
-            target_y = self.start_room.rect.centery- self.display.get_height() / 2 - 70
+        match self.state:
             
+            case 'game':
+                
+                if not self.player.current_room.locked:
+                    target_x = self.player.rect.centerx - self.display.get_width() / 2
+                    target_y = self.player.rect.centery- self.display.get_height() / 2
+                else:
+                    target_x = self.player.current_room.rect.centerx  - self.display.get_width() / 2
+                    target_y = self.player.current_room.rect.centery  - self.display.get_height() / 2
+            
+            case 'start_room':
+        
+                target_x = self.start_room.rect.centerx - self.display.get_width() / 2
+                target_y = self.start_room.rect.centery- self.display.get_height() / 2 - 70
+
         # move the camera
         self.camera_target[0] += ((target_x - self.camera_target[0]) / self.scroll_speed) *self.dt
         self.camera_target[1] += ((target_y - self.camera_target[1]) / self.scroll_speed)*self.dt
@@ -645,6 +647,8 @@ class Game:
             
     def __main_menu(self):
         if self.state == 'game' or self.state == 'start_room':
+            
+            self.old_state = self.state
             
             self.main_menu_buttons[0].text = 'Continue'
             self.main_menu_buttons[0].cto = (-30, -4)

@@ -31,17 +31,14 @@ class Minimap:
         for room in self.rooms:
             color = (255,255,255)
             if show_coloured_map:
-                if room.type == 'start':
-                    color = (0,255,255) 
+
+                match room.type:
                     
-                elif room.type == 'fight':
-                    color = (255,0,0)
-                    
-                elif room.type == 'chest':
-                    color = (255,255,0)
-                    
-                elif room.type == 'finish':
-                    color = (100,100,0)
+                    case 'start': color = (0,255,255)
+                    case 'fight': color = (255,0,0)
+                    case 'chest': color = (255,255,0)
+                    case 'finish': color = (100,100,0)
+                
                 
             pygame.draw.rect(self.room_surface, color, 
             pygame.Rect(

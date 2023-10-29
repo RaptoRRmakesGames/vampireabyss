@@ -717,125 +717,126 @@ class Player:
     def keep_in_hallway(self, display=pygame.Surface((0,0)), offset=[0,0]):
         if self.curent_hallway:
             
-            if self.curent_hallway.type == 'h':
+            match self.current_hallway.type:
                 
-                toprect = pygame.Rect(self.curent_hallway.rect.x, self.curent_hallway.rect.y - self.curent_hallway.height - 60, self.curent_hallway.rect.width, self.curent_hallway.rect.height+60 ,)
-                
+                case 'h':
+                    toprect = pygame.Rect(self.curent_hallway.rect.x, self.curent_hallway.rect.y - self.curent_hallway.height - 60, self.curent_hallway.rect.width, self.curent_hallway.rect.height+60 ,)
                     
-                if toprect.colliderect(pygame.Rect(self.rect.x  + self.dx , self.rect.y  , self.rect.width, self.rect.height)):
-                    
-                    
-                    if self.dx > 0:
                         
-                        self.rect.right = toprect.left
+                    if toprect.colliderect(pygame.Rect(self.rect.x  + self.dx , self.rect.y  , self.rect.width, self.rect.height)):
+                        
+                        
+                        if self.dx > 0:
                             
-                        self.dx = 0
-                        self.velocity.x = 0
-                    if self.dx < 0:
-                        
-                        self.rect.left = toprect.right
+                            self.rect.right = toprect.left
+                                
+                            self.dx = 0
+                            self.velocity.x = 0
+                        if self.dx < 0:
                             
-                        self.dx = 0
-                        self.velocity.x = 0
-                    
-                elif toprect.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
-                    
-                    self.rect.top = toprect.bottom
+                            self.rect.left = toprect.right
+                                
+                            self.dx = 0
+                            self.velocity.x = 0
                         
-                    self.dy = 0
-                    self.velocity.y = 0
+                    elif toprect.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
+                        
+                        self.rect.top = toprect.bottom
+                            
+                        self.dy = 0
+                        self.velocity.y = 0
 
-                bottom = pygame.Rect(self.curent_hallway.rect.x, self.curent_hallway.rect.y + self.curent_hallway.height , self.curent_hallway.rect.width, self.curent_hallway.rect.height + 60,)
-                
-                if bottom.colliderect(pygame.Rect(self.rect.x  + self.dx , self.rect.y  , self.rect.width, self.rect.height)):
+                    bottom = pygame.Rect(self.curent_hallway.rect.x, self.curent_hallway.rect.y + self.curent_hallway.height , self.curent_hallway.rect.width, self.curent_hallway.rect.height + 60,)
                     
-                    
-                    if self.dx > 0:
+                    if bottom.colliderect(pygame.Rect(self.rect.x  + self.dx , self.rect.y  , self.rect.width, self.rect.height)):
                         
-                        self.rect.right = bottom.left
+                        
+                        if self.dx > 0:
                             
-                        self.dx = 0
-                        self.velocity.x = 0
-                    if self.dx < 0:
-                        
-                        self.rect.left = bottom.right
+                            self.rect.right = bottom.left
+                                
+                            self.dx = 0
+                            self.velocity.x = 0
+                        if self.dx < 0:
                             
-                        self.dx = 0
-                        self.velocity.x = 0
-                    
-                elif bottom.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
-                    
-                    self.rect.bottom = bottom.top
+                            self.rect.left = bottom.right
+                                
+                            self.dx = 0
+                            self.velocity.x = 0
                         
-                    self.dy = 0
-                    self.velocity.y = 0
-                    
-                rrec1 = pygame.Rect(toprect.x - offset[0],toprect.y - offset[1], toprect.width, toprect.height)
-                rrect2 = pygame.Rect(bottom.x - offset[0],bottom.y - offset[1], bottom.width, bottom.height)
-                
-                return rrec1, rrect2
-                    
-            elif self.curent_hallway.type == 'v':
-                
-                leftrect = pygame.Rect(self.curent_hallway.rect.x-self.curent_hallway.height - 60, self.curent_hallway.rect.y , self.curent_hallway.rect.width+ 60, self.curent_hallway.rect.height,)
-                
-                if leftrect.colliderect(pygame.Rect(self.rect.x + self.dx , self.rect.y , self.rect.width, self.rect.height)):
-                    
-                    self.rect.left = leftrect.right
-                        
-                    self.dx = 0
-                    self.velocity.x = 0
-                    
-                elif leftrect.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
-                    
-                    
-                    if self.dy > 0:
-                        
-                        self.rect.bottom = leftrect.top
-                            
-                        self.dy = 0
-                        self.velocity.y = 0
-                    if self.dy < 0:
-                        
-                        self.rect.top = leftrect.bottom
-                            
-                        self.dy = 0
-                        self.velocity.y = 0
-                        
-         
-         
-                bottom = pygame.Rect(self.curent_hallway.rect.x + self.curent_hallway.height, self.curent_hallway.rect.y , self.curent_hallway.rect.width + 60, self.curent_hallway.rect.height,)
-                
-                if bottom.colliderect(pygame.Rect(self.rect.x +self.dx , self.rect.y , self.rect.width, self.rect.height)):
-                    
-                    self.rect.right = bottom.left
-                        
-                    self.dx = 0
-                    self.velocity.x = 0
-                    
-                elif bottom.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
-                    
-                    
-                    if self.dy > 0:
+                    elif bottom.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
                         
                         self.rect.bottom = bottom.top
                             
                         self.dy = 0
                         self.velocity.y = 0
-                    if self.dy < 0:
                         
-                        self.rect.top = bottom.bottom
+                    rrec1 = pygame.Rect(toprect.x - offset[0],toprect.y - offset[1], toprect.width, toprect.height)
+                    rrect2 = pygame.Rect(bottom.x - offset[0],bottom.y - offset[1], bottom.width, bottom.height)
+                    
+                    return rrec1, rrect2
+                    
+                case 'v':
+                    
+                    leftrect = pygame.Rect(self.curent_hallway.rect.x-self.curent_hallway.height - 60, self.curent_hallway.rect.y , self.curent_hallway.rect.width+ 60, self.curent_hallway.rect.height,)
+                    
+                    if leftrect.colliderect(pygame.Rect(self.rect.x + self.dx , self.rect.y , self.rect.width, self.rect.height)):
+                        
+                        self.rect.left = leftrect.right
                             
-                        self.dy = 0
-                        self.velocity.y = 0
-                        self.velocity.y = 0
+                        self.dx = 0
+                        self.velocity.x = 0
+                        
+                    elif leftrect.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
+                        
+                        
+                        if self.dy > 0:
+                            
+                            self.rect.bottom = leftrect.top
+                                
+                            self.dy = 0
+                            self.velocity.y = 0
+                        if self.dy < 0:
+                            
+                            self.rect.top = leftrect.bottom
+                                
+                            self.dy = 0
+                            self.velocity.y = 0
+                            
+            
+            
+                    bottom = pygame.Rect(self.curent_hallway.rect.x + self.curent_hallway.height, self.curent_hallway.rect.y , self.curent_hallway.rect.width + 60, self.curent_hallway.rect.height,)
                     
-                    
-                rrec1 = pygame.Rect(leftrect.x - offset[0],leftrect.y - offset[1], leftrect.width, leftrect.height)
-                rrect2 = pygame.Rect(bottom.x - offset[0],bottom.y - offset[1], bottom.width, bottom.height)
-                    
-                    
-                return rrec1, rrect2
+                    if bottom.colliderect(pygame.Rect(self.rect.x +self.dx , self.rect.y , self.rect.width, self.rect.height)):
+                        
+                        self.rect.right = bottom.left
+                            
+                        self.dx = 0
+                        self.velocity.x = 0
+                        
+                    elif bottom.colliderect(pygame.Rect(self.rect.x  , self.rect.y + self.dy , self.rect.width, self.rect.height)):
+                        
+                        
+                        if self.dy > 0:
+                            
+                            self.rect.bottom = bottom.top
+                                
+                            self.dy = 0
+                            self.velocity.y = 0
+                        if self.dy < 0:
+                            
+                            self.rect.top = bottom.bottom
+                                
+                            self.dy = 0
+                            self.velocity.y = 0
+                            self.velocity.y = 0
+                        
+                        
+                    rrec1 = pygame.Rect(leftrect.x - offset[0],leftrect.y - offset[1], leftrect.width, leftrect.height)
+                    rrect2 = pygame.Rect(bottom.x - offset[0],bottom.y - offset[1], bottom.width, bottom.height)
+                        
+                        
+                    return rrec1, rrect2
             
         return pygame.Rect(0,0,0,0), pygame.Rect(0,0,0,0)
     
@@ -902,7 +903,7 @@ class Player:
         
         self.image = self.animator.get_image()
     
-    def handle_time_shift(self):
+    def handle_time_shift(self, dt):
         if self.slow_down_time:
             
             if round(self.game.time) != 25:
@@ -922,7 +923,7 @@ class Player:
     def update(self, scroll, dt):
         k = pygame.key.get_pressed()
         
-        self.handle_time_shift()
+        self.handle_time_shift(dt)
 
         # Create a Vector2 instance for velocity
         velocity_change = pygame.math.Vector2(

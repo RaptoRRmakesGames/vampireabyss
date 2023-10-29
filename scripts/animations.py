@@ -35,7 +35,7 @@ class Animation:
         
         return Animation(self.images, self.frame_time)
         
-    def update(self):
+    def update(self, ):
         self.done = False
         
         time_now = pygame.time.get_ticks()
@@ -51,6 +51,7 @@ class Animation:
                 return 
                 
             self.index += 1
+            self.index = round(self.index)
 
 
 class Animator:
@@ -96,9 +97,9 @@ class Animator:
         
         return self.anim.get_image()
     
-    def update_animations(self):
+    def update_animations(self,):
         
-        self.anim.update()
+        self.anim.update( )
         
     def set_anim(self, animname : str):
         
