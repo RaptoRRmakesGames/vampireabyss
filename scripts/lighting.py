@@ -39,6 +39,8 @@ class Lighting:
         
     def create_light(self, nick, col_range=100, size_multi= 1, color_extra = (1,1,1)):
         self.lights[nick] = self.__create_light_surf(col_range, size_multi, color_extra)
+        
+    
     
     def create_light_folder(self, fold_name, keys, vals):
         

@@ -4,12 +4,10 @@ from pygame.time import get_ticks as tn
 from random import randint, choice
 
 from scripts.combat_manager import Hitbox
-# from scripts.writing import Writing
 from scripts.settings import coin_multi
 from scripts.animations import Animation, Animator
 from scripts.font_inits import *
-
-
+from scripts.effects import Lighting
 
 def outline(img):
     mask = pygame.mask.from_surface(img)
@@ -88,10 +86,6 @@ class Item:
             image.blit(self.world_image, points[i])
             
             
-            
-            # pygame.image.save(image, f"assets/images/weapons/game_world_weapon_sprites/game_generated/{self.carry_type}_{self.world_game_img_name}_{i}.png")
-            
-            
         return img_list
     
     def set_inventory(self, inventory):
@@ -164,8 +158,6 @@ weapons_dict = {
     'blades' : Item('weapon', "Zeus's Hidden Blades", pygame.image.load('assets/images/weapons/hidden_blade.png').convert_alpha(),world_game_name='hidden_blade', carry_type='single_hand' ,desc='Handcrafted from Zeus himself,lnbrThese blades strike lighting fast and stun', stack_size=-1),
     'katana' : Item('weapon', "Fujin's Sword", pygame.image.load('assets/images/weapons/katana.png').convert_alpha(),world_game_name='', carry_type='single_hand' ,desc='Created in Fujins finest forgery,lnbrThis Katana will slice flesh like its wind'),
 }
-
-
 
 class Inventory:
     
@@ -530,9 +522,9 @@ class Inventory:
                 self.player.weapon = self.val_list[0]
                 
             else:
-                
                 self.player.has_weapon = False 
                 self.player.weapon = None
+                
         except IndexError:
             pass 
 
@@ -545,7 +537,6 @@ class Inventory:
         
         self.player.refresh_powers()
         
-
 class Player:
     
     def __init__(self, pos, speed, start_room, game):
@@ -647,6 +638,7 @@ class Player:
         
         self.slow_down_time = False
         self.lighting_pos = []
+        self.lighting_objs = []
         
     def dashing(self):
         
@@ -717,7 +709,7 @@ class Player:
     def keep_in_hallway(self, display=pygame.Surface((0,0)), offset=[0,0]):
         if self.curent_hallway:
             
-            match self.current_hallway.type:
+            match self.curent_hallway.type:
                 
                 case 'h':
                     toprect = pygame.Rect(self.curent_hallway.rect.x, self.curent_hallway.rect.y - self.curent_hallway.height - 60, self.curent_hallway.rect.width, self.curent_hallway.rect.height+60 ,)
@@ -896,8 +888,6 @@ class Player:
             self.animator.set_anim_no_refresh('run_'+self.ori)
             
         else:
-                
-        # if self.animator.anim_name.split('_')[0] == 'idle':
             
             self.animator.set_anim_no_refresh('idle'+'_'+self.ori)
         
@@ -919,7 +909,6 @@ class Player:
             else:
                 self.game.time = 100
         
-    
     def update(self, scroll, dt):
         k = pygame.key.get_pressed()
         
@@ -953,6 +942,10 @@ class Player:
         self.update_orientation(scroll)
 
         self.update_combat()
+        
+        for lighting in self.lighting_objs:
+            lighting.update()
+            
 
         self.render_rect = pygame.FRect(self.rect.x - 0, self.rect.y - 0, self.rect.width, self.rect.height)
 
@@ -1022,7 +1015,6 @@ class Player:
     
     def update_attacks(self):
 
-
         for hitbox in self.hitboxes:
             
             if hitbox.die_time != 'stayforever':
@@ -1033,7 +1025,6 @@ class Player:
                     
                     self.hitboxes.remove(hitbox)
                     
-        
         if not self.has_weapon or not self.doing_special_attack:
                 
             if tn() > self.stop_attack_time and self.attacking:
@@ -1055,8 +1046,6 @@ class Player:
                 
             return 
         
-        
-        
         match self.weapon.name:
             
             case "Zeus's Hidden Blades":
@@ -1076,21 +1065,16 @@ class Player:
                     
                     self.next_attack = tn() + self.attack_interval + 15000
                     self.doing_special_attack = False
-                    
-                
-                    
-                    
-                
                 
     def do_lighting_attack(self):
         
         [self.hitboxes.append(Hitbox(pygame.Rect(*pos, 32,32), 'up', 5, 100)) for pos in self.lighting_pos]
+        [self.lighting_objs.append(Lighting((pos[0], pos[1] + 16))) for pos in self.lighting_pos]
         
         self.slow_down_time = False
         
         self.lighting_pos = []
-        
-    
+         
     def update_combat(self):
         keys = pygame.key.get_pressed()
         
@@ -1106,7 +1090,7 @@ class Player:
         if not self.can_attack:
             return
             
-        if keys[pygame.K_LCTRL]:
+        if keys[pygame.K_LCTRL] and self.game.state == 'game':
             
             if not self.has_weapon:
             
@@ -1137,21 +1121,22 @@ class Player:
     
     def render(self, display, offset, nocap=True):
         self.render_rect = pygame.FRect(self.rect.x - offset[0], self.rect.y - offset[1], self.rect.width, self.rect.height)
-
-        
-        # pygame.draw.rect(display, (125, 250, 100), self.render_rect)
-        # pygame.draw.circle(display, (0,0,0), self.render_rect.center, 3)
         
         if nocap:
-            display.fblits([(self.image, (self.rect.x - offset[0] , self.rect.y - offset[1] ))])
+            display.fblits([(self.image, (self.rect.x - offset[0] , self.rect.y - offset[1]))])
+
+            [self.game.light_eng.render_unnat_light( display, 'lighting', [pos[0] - offset[0] - 25, pos[1]  - offset[1] - 40]) for pos in self.lighting_pos]
             
-            # pygame.draw.circle(display, (255,255,255), self.pos + pygame.math.Vector2(400 + 29,300 - 57), 16)
+            # for box in self.hitboxes:
+            #     box.render(display, offset)
             
-            [pygame.draw.rect(display, (255,255,255), pygame.Rect(pos[0] - offset[0], pos[1] - offset[1], 32,32)) for pos in self.lighting_pos]
-            
-            for box in self.hitboxes:
-          
-                box.render(display, offset)
+            for lighting in self.lighting_objs:
+                rrect = lighting.render(display, offset)
+                self.game.light_eng.render_unnat_light( display, 'lighting', [rrect.topleft[0] - 25, rrect.topleft[1] + 40 ], ) if tuple(lighting.image.get_at((18, 66))) != (0,0,0) else 0 
+
+                if lighting.to_be_removed:
+
+                    self.lighting_objs.remove(lighting)
      
     def set_pos(self, pos):
         

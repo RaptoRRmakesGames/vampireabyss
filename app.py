@@ -252,6 +252,7 @@ class Game:
         self.light_eng.create_light('room_light', 255, 1.5)
         self.light_eng.create_light('mouse_glow', 100,0.3,(1.1,0,0))
         self.light_eng.create_light('bat_glow', 60, 0.8, (1.5, 0, 0))
+        self.light_eng.create_light('lighting', 60, 0.8, (1.0, 2.4, 2.4))
         
         self.light_eng.create_light_folder('powerup_glow', [SpeedUp, StrenghtUp], [create_circle_light(35, 0.4 * 3, (5,5,1)), create_circle_light(35, 0.4* 3, (5,1,1))])
         
