@@ -9,6 +9,13 @@ class Lighting:
         self.base_surf = pygame.Surface((game.display.get_size())).convert_alpha()
         self.dark_amount = 50
         self.__reset_dark_surf()
+        
+        self.queue = []
+        
+        
+    def add_to_queue(self, nick : str, pos : (int, int), nat : bool =True):
+        self.queue.append((nick, pos, nat))
+        
     
     def __reset_dark_surf(self):
         self.base_surf.fill((self.dark_amount, self.dark_amount, self.dark_amount))
@@ -40,8 +47,6 @@ class Lighting:
     def create_light(self, nick, col_range=100, size_multi= 1, color_extra = (1,1,1)):
         self.lights[nick] = self.__create_light_surf(col_range, size_multi, color_extra)
         
-    
-    
     def create_light_folder(self, fold_name, keys, vals):
         
         self.lights[fold_name] = {}
@@ -58,11 +63,16 @@ class Lighting:
         
         display.blit(self.lights[fold_name][key], (pos[0] - scroll[0],pos[1] - scroll[1]), special_flags = pygame.BLEND_RGBA_ADD if not dark else pygame.BLEND_MULT)
         
-    
     def render_nat_light(self, nick, pos, scroll=[0,0], dark=False):
         self.base_surf.blit(self.lights[nick], (pos[0]- scroll[0], pos[1]- scroll[1]), special_flags = pygame.BLEND_RGBA_ADD if not dark else pygame.BLEND_MULT)
 
     def render_unnat_light(self, display, nick, pos, scroll=[0,0], dark=False):
         display.blit(self.lights[nick], (pos[0]- scroll[0], pos[1]- scroll[1]), special_flags = pygame.BLEND_RGBA_ADD if not dark else pygame.BLEND_MULT)
         
-    
+    def run_queue(self, display):
+        
+        for light in self.queue:
+            
+            self.render_nat_light(light[0], light[1]) if light[2] else self.render_unnat_light(display, light[0], light[1])
+            
+            self.queue.remove(light)

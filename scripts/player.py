@@ -1132,8 +1132,12 @@ class Player:
             
             for lighting in self.lighting_objs:
                 rrect = lighting.render(display, offset)
-                self.game.light_eng.render_unnat_light( display, 'lighting', [rrect.topleft[0] - 25, rrect.topleft[1] + 40 ], ) if tuple(lighting.image.get_at((18, 66))) != (0,0,0) else 0 
-
+                self.game.light_eng.render_unnat_light( display, 'lighting', [rrect.topleft[0] - 35, rrect.topleft[1] + 60 ], ) if tuple(lighting.image.get_at((18, 66))) != (0,0,0) else 0 
+                self.game.light_eng.add_to_queue('lighting2',[rrect.topleft[0] - 45, rrect.topleft[1] + 40] )
+                self.game.light_eng.add_to_queue('lighting2',[rrect.topleft[0] - 45, rrect.topleft[1] + 20 ] )
+                self.game.light_eng.add_to_queue('lighting2',[rrect.topleft[0] - 45, rrect.topleft[1]  ] )
+                self.game.light_eng.add_to_queue('lighting2',[rrect.topleft[0] - 45, rrect.topleft[1] - 20 ] )
+                self.game.light_eng.add_to_queue('lighting2',[rrect.topleft[0] - 45, rrect.topleft[1] - 40 ] )
                 if lighting.to_be_removed:
 
                     self.lighting_objs.remove(lighting)

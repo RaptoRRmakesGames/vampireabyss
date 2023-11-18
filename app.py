@@ -253,6 +253,7 @@ class Game:
         self.light_eng.create_light('mouse_glow', 100,0.3,(1.1,0,0))
         self.light_eng.create_light('bat_glow', 60, 0.8, (1.5, 0, 0))
         self.light_eng.create_light('lighting', 60, 0.8, (1.0, 2.4, 2.4))
+        self.light_eng.create_light('lighting2', 200, 0.3, (1.0, 1, 1))
         
         self.light_eng.create_light_folder('powerup_glow', [SpeedUp, StrenghtUp], [create_circle_light(35, 0.4 * 3, (5,5,1)), create_circle_light(35, 0.4* 3, (5,1,1))])
         
@@ -464,6 +465,8 @@ class Game:
         self.light_eng.clear_lights()
         
         if self.state == 'game':
+            
+            self.light_eng.run_queue(self.display)
             
             if not self.player.current_room.type == 'fight' or( self.player.curent_hallway and self.player.curent_hallway.rect.colliderect(self.player.rect)):
 
